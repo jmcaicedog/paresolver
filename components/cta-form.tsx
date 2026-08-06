@@ -4,21 +4,6 @@ import Image from "next/image"
 import { useState } from "react"
 import { Reveal } from "@/components/reveal"
 
-const PUEBLOS = [
-  "Caguas",
-  "San Juan",
-  "Bayamón",
-  "Carolina",
-  "Ponce",
-  "Gurabo",
-  "Juncos",
-  "Cidra",
-  "Aguas Buenas",
-  "San Lorenzo",
-  "Humacao",
-  "Otro",
-]
-
 const EMPLOYMENT_TYPES = [
   { value: "regular", label: "Regular" },
   { value: "negocio-propio", label: "Negocio propio" },
@@ -58,11 +43,12 @@ export function CtaForm() {
     tienePlanillas: "",
     posicionEmpleo: "",
     tiempoEmpleo: "",
+    lugarEmpleo: "",
+    puestoEmpleo: "",
     ingresoNeto: "",
     fechaNacimiento: "",
     autorizacionCredito: false,
     seguroSocial: "",
-    lugarEmpleoPuesto: "",
     direccionPostal: "",
   })
 
@@ -233,30 +219,23 @@ export function CtaForm() {
                   <label htmlFor="pueblo" className="sr-only">
                     Pueblo
                   </label>
-                  <select
+                  <input
                     id="pueblo"
                     name="pueblo"
                     required
+                    autoComplete="address-level2"
+                    placeholder="PUEBLO"
                     value={values.pueblo}
                     onChange={(e) => setValues((v) => ({ ...v, pueblo: e.target.value }))}
-                    className={`${fieldClass} ${values.pueblo ? "" : "text-brand-navy/60"}`}
-                  >
-                    <option value="" disabled>
-                      PUEBLO
-                    </option>
-                    {PUEBLOS.map((p) => (
-                      <option key={p} value={p} className="text-brand-navy">
-                        {p}
-                      </option>
-                    ))}
-                  </select>
+                    className={fieldClass}
+                  />
                 </div>
                 <button
                   type="submit"
                   disabled={leadStatus === "submitting"}
                   className="group flex items-center justify-center gap-2 rounded-lg bg-brand-navy px-6 py-3.5 text-base font-bold text-white shadow-md transition-all duration-300 hover:-translate-y-0.5 hover:bg-brand-navy/90 hover:shadow-lg focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand-navy/30 sm:col-span-1"
                 >
-                  {leadStatus === "submitting" ? "ENVIANDO..." : "ENVIAR REGISTRO"}
+                  {leadStatus === "submitting" ? "ENVIANDO..." : "SOLICITAR AHORA"}
                   <span className="transition-transform duration-300 group-hover:translate-x-1" aria-hidden="true">
                     →
                   </span>
@@ -294,7 +273,7 @@ export function CtaForm() {
                   Perfecto, hemos recibido tu registro, ahora puedes hacer tu solicitud de pre-calificación
                 </h3>
                 <p className="mt-2 text-sm text-brand-navy/75">
-                  Este formulario es opcional y nos ayuda a preparar mejor tu estudio de preaprobado.
+                  Completar este formulario es opcional y nos permitirá preparar mejor tu evaluación de preaprobación.
                 </p>
               </div>
               <button
@@ -408,6 +387,36 @@ export function CtaForm() {
                 </div>
 
                 <div>
+                  <label htmlFor="lugarEmpleo" className="sr-only">
+                    Lugar de empleo
+                  </label>
+                  <input
+                    id="lugarEmpleo"
+                    name="lugarEmpleo"
+                    required
+                    placeholder="LUGAR DE EMPLEO"
+                    value={prequalValues.lugarEmpleo}
+                    onChange={(e) => setPrequalValues((v) => ({ ...v, lugarEmpleo: e.target.value }))}
+                    className={fieldClass}
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="puestoEmpleo" className="sr-only">
+                    Puesto de empleo
+                  </label>
+                  <input
+                    id="puestoEmpleo"
+                    name="puestoEmpleo"
+                    required
+                    placeholder="PUESTO DE EMPLEO"
+                    value={prequalValues.puestoEmpleo}
+                    onChange={(e) => setPrequalValues((v) => ({ ...v, puestoEmpleo: e.target.value }))}
+                    className={fieldClass}
+                  />
+                </div>
+
+                <div>
                   <label htmlFor="ingresoNeto" className="sr-only">
                     Ingreso neto
                   </label>
@@ -448,21 +457,6 @@ export function CtaForm() {
                     placeholder="SEGURO SOCIAL"
                     value={prequalValues.seguroSocial}
                     onChange={(e) => setPrequalValues((v) => ({ ...v, seguroSocial: e.target.value }))}
-                    className={fieldClass}
-                  />
-                </div>
-
-                <div>
-                  <label htmlFor="lugarEmpleoPuesto" className="sr-only">
-                    Lugar de empleo y puesto
-                  </label>
-                  <input
-                    id="lugarEmpleoPuesto"
-                    name="lugarEmpleoPuesto"
-                    required
-                    placeholder="LUGAR DE EMPLEO Y PUESTO"
-                    value={prequalValues.lugarEmpleoPuesto}
-                    onChange={(e) => setPrequalValues((v) => ({ ...v, lugarEmpleoPuesto: e.target.value }))}
                     className={fieldClass}
                   />
                 </div>
