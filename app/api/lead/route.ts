@@ -9,6 +9,7 @@ type LeadPayload = {
   telefono: string
   pueblo: string
   correo: string
+  producto: string
 }
 
 function escapeHtml(value: string) {
@@ -55,6 +56,10 @@ function leadEmailTemplate(payload: LeadPayload) {
             <td style="padding:10px;border:1px solid #e6ebff;">${escapeHtml(payload.correo)}</td>
           </tr>
           <tr>
+            <td style="padding:10px;border:1px solid #e6ebff;background:#f8faff;font-weight:700;">Producto</td>
+            <td style="padding:10px;border:1px solid #e6ebff;">${escapeHtml(payload.producto)}</td>
+          </tr>
+          <tr>
             <td style="padding:10px;border:1px solid #e6ebff;background:#f8faff;font-weight:700;">Fecha y hora del registro</td>
             <td style="padding:10px;border:1px solid #e6ebff;">${escapeHtml(submittedAt)}</td>
           </tr>
@@ -78,13 +83,14 @@ export async function POST(request: Request) {
       telefono: (body.telefono ?? "").trim(),
       pueblo: (body.pueblo ?? "").trim(),
       correo: (body.correo ?? "").trim(),
+      producto: (body.producto ?? "").trim(),
     }
 
-    if (!payload.nombre || !payload.telefono || !payload.pueblo || !payload.correo) {
+    if (!payload.nombre || !payload.telefono || !payload.pueblo || !payload.correo || !payload.producto) {
       return NextResponse.json({ message: "Faltan campos obligatorios." }, { status: 400 })
     }
 
-    const subject = `Lead Nuevo | ${payload.nombre} | ${payload.telefono} | Registro Inicial`
+    const subject = `Lead Nuevo | ${payload.nombre} | ${payload.telefono} | ${payload.producto}`
 
     const resendResponse = await fetch("https://api.resend.com/emails", {
       method: "POST",

@@ -9,6 +9,11 @@ const EMPLOYMENT_TYPES = [
   { value: "negocio-propio", label: "Negocio propio" },
 ] as const
 
+const PRODUCTS = [
+  { value: "prestamo-personal", label: "Préstamo Personal" },
+  { value: "prestamo-auto", label: "Préstamo de Auto" },
+] as const
+
 function getAgeFromBirthDate(dateIso: string) {
   const date = new Date(dateIso)
   if (Number.isNaN(date.getTime())) {
@@ -37,6 +42,7 @@ export function CtaForm() {
     correo: "",
     telefono: "",
     pueblo: "",
+    producto: "",
   })
   const [prequalValues, setPrequalValues] = useState({
     tipoEmpleo: "",
@@ -229,6 +235,28 @@ export function CtaForm() {
                     onChange={(e) => setValues((v) => ({ ...v, pueblo: e.target.value }))}
                     className={fieldClass}
                   />
+                </div>
+                <div>
+                  <label htmlFor="producto" className="sr-only">
+                    Producto
+                  </label>
+                  <select
+                    id="producto"
+                    name="producto"
+                    required
+                    value={values.producto}
+                    onChange={(e) => setValues((v) => ({ ...v, producto: e.target.value }))}
+                    className={`${fieldClass} ${values.producto ? "" : "text-brand-navy/60"}`}
+                  >
+                    <option value="" disabled>
+                      PRODUCTO
+                    </option>
+                    {PRODUCTS.map((product) => (
+                      <option key={product.value} value={product.label} className="text-brand-navy">
+                        {product.label}
+                      </option>
+                    ))}
+                  </select>
                 </div>
                 <button
                   type="submit"
