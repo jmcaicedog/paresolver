@@ -20,7 +20,7 @@ export function PricingSection() {
         </Reveal>
 
         <div className="mt-10 grid items-center gap-8 lg:grid-cols-[280px_1fr]">
-          <Reveal from="left" className="mx-auto hidden max-w-[280px] lg:block">
+          <Reveal from="left" className="mx-auto hidden max-w-70 lg:block">
             <Image
               src="/images/school-supplies.png"
               alt="Libretas, lápices y útiles escolares"
@@ -30,10 +30,14 @@ export function PricingSection() {
             />
           </Reveal>
 
-          <ul className="mx-auto w-full max-w-2xl divide-y divide-brand-navy/10">
+          <ul className="mx-auto w-full max-w-2xl space-y-2">
             {plans.map((plan, i) => (
-              <Reveal as="li" key={plan.amount} delay={i * 90} from="up">
-                <div className="flex flex-wrap items-baseline justify-center gap-x-3 gap-y-1 py-4 sm:justify-between sm:gap-x-6">
+              <Reveal as="li" key={plan.amount} delay={i * 90} from="up" className="group">
+                <div className="relative flex flex-wrap items-baseline justify-center gap-x-3 gap-y-1 overflow-hidden rounded-2xl border border-transparent px-4 py-4 transition-all duration-300 sm:justify-between sm:gap-x-6 sm:px-5 group-hover:-translate-y-0.5 group-hover:border-brand-blue/20 group-hover:bg-white/70 group-hover:shadow-lg">
+                  <span
+                    aria-hidden="true"
+                    className="absolute bottom-0 left-0 top-0 w-1 -translate-x-full bg-brand-blue transition-transform duration-300 group-hover:translate-x-0"
+                  />
                   <span className="text-3xl font-extrabold text-brand-navy sm:text-4xl">{plan.amount}</span>
                   <span className="text-lg font-semibold text-brand-blue">desde</span>
                   <span className="text-3xl font-extrabold text-brand-navy sm:text-4xl">
