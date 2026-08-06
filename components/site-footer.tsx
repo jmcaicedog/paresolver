@@ -1,12 +1,12 @@
 import Link from "next/link"
-import { CossecLogo, EqualHousingLogo } from "@/components/brand-logos"
+import { CossecLogo } from "@/components/brand-logos"
 
 export function SiteFooter() {
   return (
     <footer className="bg-brand-mint">
       <div className="mx-auto max-w-5xl px-5 py-12">
         <div className="grid gap-8 md:grid-cols-[1fr_auto] md:items-start">
-          <div className="space-y-4 text-[11px] leading-relaxed text-muted-foreground">
+          <div className="max-w-3xl space-y-5 text-[12px] leading-6 text-brand-navy/60">
             <p>
               Préstamo de Autos Nuevos. Sujeto a aprobación de crédito. Ciertas restricciones y condiciones aplican.
               Financiamiento de auto nuevo desde 2.99% APR hasta 48 meses para pagar, 0 pronto con póliza GAP. Empírica
@@ -26,7 +26,6 @@ export function SiteFooter() {
 
           <div className="flex items-center gap-6 md:flex-col md:items-end md:gap-5">
             <CossecLogo />
-            <EqualHousingLogo />
           </div>
         </div>
 
