@@ -5,8 +5,8 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
-  --font-sans: var(--font-poppins), ui-sans-serif, system-ui, sans-serif;
-  --font-heading: var(--font-poppins), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "forma-djr-deck", "Forma DJR Deck", ui-sans-serif, system-ui, sans-serif;
+  --font-heading: "forma-djr-deck", "Forma DJR Deck", ui-sans-serif, system-ui, sans-serif;
 
   --color-brand-blue: var(--brand-blue);
   --color-brand-navy: var(--brand-navy);
