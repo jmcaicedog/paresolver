@@ -30,6 +30,12 @@ export function VideoSection() {
                 className="group absolute inset-0 grid place-items-center"
               >
                 <span className="absolute inset-0 bg-brand-mint" aria-hidden="true" />
+                <span
+                  className="absolute left-1/2 top-6 w-[92%] max-w-xl -translate-x-1/2 rounded-full border border-brand-blue/20 bg-white/85 px-4 py-2 text-center text-xs font-bold uppercase tracking-[0.18em] text-brand-blue"
+                  aria-hidden="true"
+                >
+                  Video oficial de la campaña próximamente
+                </span>
                 <span className="relative grid h-20 w-20 place-items-center rounded-full bg-brand-blue text-white shadow-lg transition-transform duration-300 group-hover:scale-110">
                   <span className="absolute inset-0 animate-pulse-ring rounded-full bg-brand-blue" aria-hidden="true" />
                   <svg width="30" height="30" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" className="ml-1">
@@ -38,6 +44,13 @@ export function VideoSection() {
                 </span>
                 <span className="absolute bottom-5 text-sm font-semibold text-brand-navy/70">
                   Reproducir video
+                </span>
+                <span
+                  className="absolute bottom-14 left-1/2 w-[92%] max-w-lg -translate-x-1/2 rounded-xl border border-brand-navy/15 bg-white/90 px-4 py-3 text-center text-xs text-brand-navy/75 shadow-lg"
+                  aria-hidden="true"
+                >
+                  Slide de contenido en preparación: aquí se mostrará el mensaje principal del video cuando esté
+                  disponible.
                 </span>
               </button>
             )}

@@ -3,8 +3,10 @@ import { cn } from "@/lib/utils"
 
 export function PaResolverLogo({
   className,
+  imageClassName,
 }: {
   className?: string
+  imageClassName?: string
   variant?: "dark" | "light"
 }) {
   return (
@@ -14,7 +16,7 @@ export function PaResolverLogo({
         alt="Pa' Resolver"
         width={160}
         height={60}
-        className="h-12 w-auto object-contain"
+        className={cn("h-12 w-auto object-contain", imageClassName)}
       />
     </span>
   )
@@ -22,8 +24,10 @@ export function PaResolverLogo({
 
 export function CaguasCoopLogo({
   className,
+  imageClassName,
 }: {
   className?: string
+  imageClassName?: string
   variant?: "dark" | "light"
 }) {
   return (
@@ -33,7 +37,7 @@ export function CaguasCoopLogo({
         alt="Caguas Coop"
         width={160}
         height={60}
-        className="h-12 w-auto object-contain"
+        className={cn("h-12 w-auto object-contain", imageClassName)}
       />
     </span>
   )

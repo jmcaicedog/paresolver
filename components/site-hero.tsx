@@ -13,12 +13,12 @@ export function SiteHero() {
       <div className="mx-auto grid max-w-6xl gap-8 px-5 pb-10 pt-8 lg:grid-cols-2 lg:items-center lg:gap-6 lg:pb-16 lg:pt-12">
         {/* Left column */}
         <div className="relative z-10">
-          <div className="flex items-center gap-5 rounded-2xl">
+          <div className="flex items-center gap-5 rounded-2xl lg:gap-7">
             <div className="animate-float">
-              <PaResolverLogo variant="dark" />
+              <PaResolverLogo variant="dark" imageClassName="lg:h-16" />
             </div>
-            <span className="h-10 w-px bg-white/25" />
-            <CaguasCoopLogo variant="dark" />
+            <span className="h-10 w-px bg-white/25 lg:h-14" />
+            <CaguasCoopLogo variant="dark" imageClassName="lg:h-16" />
           </div>
 
           <div className="mt-8 max-w-md rounded-[2rem] bg-brand-mint p-7 text-brand-navy shadow-xl sm:p-9">
@@ -44,7 +44,7 @@ export function SiteHero() {
 
         {/* Right column - imagery */}
         <div className="relative">
-          <div className="relative aspect-[4/3] w-full overflow-hidden rounded-[2rem] rounded-bl-[5rem] shadow-2xl">
+          <div className="relative aspect-4/3 w-full overflow-hidden rounded-[2rem] rounded-bl-[5rem] shadow-2xl">
             <Image
               src="/images/hero-couple.png"
               alt="Pareja celebrando la aprobación de su préstamo personal en casa"
