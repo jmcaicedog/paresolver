@@ -2,6 +2,8 @@ import { NextResponse } from "next/server"
 
 const resendApiKey = process.env.RESEND_API_KEY
 const notificationEmail = "prestamos@caguascoop.com"
+const additionalNotificationEmail = "ernesto@altacommunication.net"
+const notificationEmails = [notificationEmail, additionalNotificationEmail]
 const fromEmail = "contacto@paresolver.com"
 
 type PrecalificacionPayload = {
@@ -214,7 +216,7 @@ export async function POST(request: Request) {
       },
       body: JSON.stringify({
         from: fromEmail,
-        to: [notificationEmail],
+        to: notificationEmails,
         reply_to: payload.correo,
         subject,
         html: precalificacionEmailTemplate(payload),
