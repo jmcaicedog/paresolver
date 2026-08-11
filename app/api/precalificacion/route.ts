@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server"
+import { saveFormSubmission } from "@/lib/db"
 
 const resendApiKey = process.env.RESEND_API_KEY
 const notificationEmail = "prestamos@caguascoop.com"
@@ -207,6 +208,14 @@ export async function POST(request: Request) {
     }
 
     const subject = `Pre-calificación | ${payload.nombre} | ${payload.telefono} | ${payload.tipoEmpleo === "regular" ? "Empleo regular" : "Negocio propio"}`
+
+    await saveFormSubmission({
+      formType: "pre_calificacion",
+      name: payload.nombre,
+      email: payload.correo,
+      phone: payload.telefono,
+      payload: { ...payload },
+    })
 
     const resendResponse = await fetch("https://api.resend.com/emails", {
       method: "POST",

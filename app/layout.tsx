@@ -1,5 +1,6 @@
 import { Analytics } from '@vercel/analytics/next'
 import type { Metadata, Viewport } from 'next'
+import { AnalyticsTracker } from '@/components/analytics-tracker'
 import './globals.css'
 
 export const metadata: Metadata = {
@@ -42,6 +43,7 @@ export default function RootLayout({
         <link rel="stylesheet" href="https://use.typekit.net/wdb5eza.css" />
       </head>
       <body className="font-sans antialiased">
+        <AnalyticsTracker />
         {children}
         {process.env.NODE_ENV === 'production' && <Analytics />}
       </body>

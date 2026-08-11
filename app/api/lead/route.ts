@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server"
+import { saveFormSubmission } from "@/lib/db"
 
 const resendApiKey = process.env.RESEND_API_KEY
 const notificationEmail = "prestamos@caguascoop.com"
@@ -93,6 +94,17 @@ export async function POST(request: Request) {
     }
 
     const subject = `Lead Nuevo | ${payload.nombre} | ${payload.telefono} | ${payload.producto}`
+
+    await saveFormSubmission({
+      formType: "lead_nuevo",
+      name: payload.nombre,
+      email: payload.correo,
+      phone: payload.telefono,
+      payload: {
+        pueblo: payload.pueblo,
+        producto: payload.producto,
+      },
+    })
 
     const resendResponse = await fetch("https://api.resend.com/emails", {
       method: "POST",
