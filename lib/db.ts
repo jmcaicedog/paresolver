@@ -74,7 +74,7 @@ export async function ensureDefaultAdmin() {
   const password = process.env.ADMIN_PASSWORD
 
   if (!email || !password) {
-    return null
+    throw new Error('ADMIN_EMAIL y ADMIN_PASSWORD deben configurarse en el entorno de producción.')
   }
 
   const existing = await sql`SELECT id FROM admin_users WHERE email = ${email} LIMIT 1`

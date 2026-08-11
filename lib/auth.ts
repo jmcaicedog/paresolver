@@ -20,7 +20,7 @@ function decodeBase64Url(value: string) {
 
 export function signSession(userId: string) {
   if (!SESSION_SECRET) {
-    throw new Error('SESSION_SECRET no está configurado en las variables de entorno.')
+    throw new Error('SESSION_SECRET no está configurado en las variables de entorno (revisa Vercel/Production Env).')
   }
 
   const payload: SessionPayload = {

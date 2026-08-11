@@ -27,7 +27,15 @@ export async function POST(request: Request) {
     const response = NextResponse.json({ ok: true })
     setSessionCookie(response, String(user.id))
     return response
-  } catch {
-    return NextResponse.json({ message: 'No se pudo iniciar sesión.' }, { status: 500 })
+  } catch (error) {
+    console.error('Error al iniciar sesión del admin:', error)
+
+    const message = error instanceof Error && error.message.includes('SESSION_SECRET')
+      ? 'Falta SESSION_SECRET en el entorno de producción.'
+      : error instanceof Error && error.message.includes('ADMIN_EMAIL')
+        ? 'Falta ADMIN_EMAIL o ADMIN_PASSWORD en el entorno de producción.'
+        : 'No se pudo iniciar sesión.'
+
+    return NextResponse.json({ message }, { status: 500 })
   }
 }
