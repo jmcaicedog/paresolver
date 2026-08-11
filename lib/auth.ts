@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server'
 
 export const SESSION_COOKIE_NAME = 'paresolver_admin_session'
 const SESSION_TTL_MS = 1000 * 60 * 60 * 12
-const SESSION_SECRET = process.env.SESSION_SECRET ?? 'paresolver-admin-dev-secret'
+const SESSION_SECRET = process.env.SESSION_SECRET
 
 export type SessionPayload = {
   userId: string
@@ -19,6 +19,10 @@ function decodeBase64Url(value: string) {
 }
 
 export function signSession(userId: string) {
+  if (!SESSION_SECRET) {
+    throw new Error('SESSION_SECRET no está configurado en las variables de entorno.')
+  }
+
   const payload: SessionPayload = {
     userId,
     exp: Date.now() + SESSION_TTL_MS,
@@ -31,7 +35,7 @@ export function signSession(userId: string) {
 }
 
 export function verifySession(token?: string): SessionPayload | null {
-  if (!token) {
+  if (!token || !SESSION_SECRET) {
     return null
   }
 
