@@ -54,11 +54,9 @@ export async function ensureSchema() {
     );
   `
 
-  await sql`
-    CREATE INDEX IF NOT EXISTS idx_form_submissions_created_at ON form_submissions (created_at DESC);
-    CREATE INDEX IF NOT EXISTS idx_form_submissions_name ON form_submissions (name);
-    CREATE INDEX IF NOT EXISTS idx_page_views_created_at ON page_views (created_at DESC);
-  `
+  await sql`CREATE INDEX IF NOT EXISTS idx_form_submissions_created_at ON form_submissions (created_at DESC);`
+  await sql`CREATE INDEX IF NOT EXISTS idx_form_submissions_name ON form_submissions (name);`
+  await sql`CREATE INDEX IF NOT EXISTS idx_page_views_created_at ON page_views (created_at DESC);`
 
   return true
 }
