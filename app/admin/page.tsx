@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import type { ReactNode } from 'react'
 import { ClipboardList, Eye, Globe2, Laptop2, LogOut, Users, X } from 'lucide-react'
 
 const formatDate = (value?: string) => {
@@ -60,25 +61,30 @@ function MetricCard({
   value,
   detail,
   icon: Icon,
+  href,
 }: {
   label: string
   value: number
-  detail: string
+  detail: ReactNode
   icon: typeof Eye
+  href: string
 }) {
   return (
-    <div className="rounded-lg border border-slate-800 bg-slate-900 p-5 shadow-sm">
+    <a
+      href={href}
+      className="group rounded-lg border border-slate-800 bg-slate-900 p-5 shadow-sm outline-none transition hover:border-sky-500/50 hover:bg-slate-800/80 focus-visible:ring-2 focus-visible:ring-sky-400"
+    >
       <div className="flex items-start justify-between gap-4">
         <div>
           <p className="text-sm font-medium text-slate-400">{label}</p>
           <p className="mt-2 text-3xl font-bold text-white">{value.toLocaleString('es-PR')}</p>
         </div>
-        <div className="grid size-10 place-items-center rounded-lg bg-sky-500/10 text-sky-300">
+        <div className="grid size-10 place-items-center rounded-lg bg-sky-500/10 text-sky-300 transition group-hover:bg-sky-500/20">
           <Icon className="size-5" aria-hidden="true" />
         </div>
       </div>
-      <p className="mt-3 truncate text-xs text-slate-500">{detail}</p>
-    </div>
+      <div className="mt-3 text-sm font-medium leading-5 text-slate-400">{detail}</div>
+    </a>
   )
 }
 
@@ -96,7 +102,7 @@ function RealBarChart({
   return (
     <div className="space-y-3">
       {data.length === 0 ? (
-        <p className="text-sm text-slate-400">Sin datos reales disponibles.</p>
+        <p className="text-sm font-medium text-slate-300">Sin datos reales disponibles.</p>
       ) : (
         data.map((item, index) => {
           const value = Number(item[valueKey] ?? 0)
@@ -104,7 +110,7 @@ function RealBarChart({
 
           return (
             <div key={`${String(item[labelKey] ?? 'unknown')}-${index}`} className="space-y-1">
-              <div className="flex items-center justify-between text-xs text-slate-300">
+              <div className="flex items-center justify-between text-sm font-medium text-slate-200">
                 <span>{String(item[labelKey] ?? 'Unknown')}</span>
                 <span>{value}</span>
               </div>
@@ -127,7 +133,7 @@ function DailyFormsChart({ data }: { data: MetricPoint[] }) {
   const chartWidth = Math.max(data.length * 64, 640)
 
   if (data.length === 0) {
-    return <div className="grid h-56 place-items-center text-sm text-slate-400">No hay formularios en este período.</div>
+    return <div className="grid h-56 place-items-center text-sm font-medium text-slate-300">No hay formularios en este período.</div>
   }
 
   return (
@@ -141,13 +147,13 @@ function DailyFormsChart({ data }: { data: MetricPoint[] }) {
 
           return (
             <div key={item.date} className="flex min-w-12 flex-1 flex-col items-center justify-end gap-2">
-              <span className="text-xs font-semibold text-slate-200">{total}</span>
+              <span className="text-sm font-semibold text-slate-100">{total}</span>
               <div
                 className="w-full max-w-10 rounded-t bg-sky-500 transition-[height] duration-500"
                 style={{ height }}
                 title={`${label}: ${total} formulario${total === 1 ? '' : 's'}`}
               />
-              <span className="h-7 whitespace-nowrap text-[11px] text-slate-500">{label}</span>
+              <span className="h-7 whitespace-nowrap text-xs font-medium text-slate-400">{label}</span>
             </div>
           )
         })}
@@ -230,7 +236,6 @@ export default function AdminPage() {
   const topCountries = useMemo(() => metrics.byCountry.slice(0, 5), [metrics.byCountry])
   const topDevices = useMemo(() => metrics.byDevice.slice(0, 5), [metrics.byDevice])
   const topOs = useMemo(() => metrics.byOs.slice(0, 5), [metrics.byOs])
-  const formBreakdown = useMemo(() => metrics.byFormType.slice(0, 5), [metrics.byFormType])
   const identifiedCountries = useMemo(
     () => topCountries.filter((item) => item.country && item.country.toLowerCase() !== 'unknown'),
     [topCountries],
@@ -241,6 +246,8 @@ export default function AdminPage() {
       : [],
     [selected],
   )
+  const leadTotal = Number(metrics.byFormType.find((item) => item.form_type === 'lead_nuevo')?.total ?? 0)
+  const prequalificationTotal = Number(metrics.byFormType.find((item) => item.form_type === 'pre_calificacion')?.total ?? 0)
 
   async function handleLogout() {
     await fetch('/api/admin/logout', { method: 'POST' })
@@ -249,13 +256,13 @@ export default function AdminPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 p-6 text-slate-50">
+    <div className="min-h-screen bg-slate-950 p-6 font-medium text-slate-50">
       <div className="mx-auto max-w-7xl space-y-6">
         <header className="flex flex-col gap-5 rounded-lg border border-slate-800 bg-slate-900 p-6 shadow-sm md:flex-row md:items-center md:justify-between">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-sky-300">Panel de control</p>
             <h1 className="mt-2 text-3xl font-bold text-white">Actividad comercial</h1>
-            <p className="mt-2 text-sm text-slate-400">Seguimiento en tiempo real de visitas y solicitudes.</p>
+            <p className="mt-2 text-base leading-6 text-slate-300">Seguimiento en tiempo real de visitas y solicitudes.</p>
           </div>
           <div className="flex gap-3">
             <button
@@ -284,38 +291,36 @@ export default function AdminPage() {
         ) : null}
 
         <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          <MetricCard label="Visitas" value={metrics.totalVisits} detail="Sesiones registradas" icon={Eye} />
-          <MetricCard label="Formularios" value={metrics.totalForms} detail="Solicitudes recibidas" icon={ClipboardList} />
+          <MetricCard label="Visitas" value={metrics.totalVisits} detail="Ver origen geográfico" icon={Eye} href="#origen-geografico" />
+          <MetricCard
+            label="Formularios"
+            value={metrics.totalForms}
+            detail={(
+              <span className="flex flex-wrap gap-x-3 gap-y-1">
+                <span><strong className="font-semibold text-slate-300">{leadTotal}</strong> leads nuevos</span>
+                <span><strong className="font-semibold text-slate-300">{prequalificationTotal}</strong> precalificaciones</span>
+              </span>
+            )}
+            icon={ClipboardList}
+            href="#registros"
+          />
           <MetricCard
             label="Países identificados"
             value={identifiedCountries.length}
             detail={identifiedCountries[0] ? `Principal: ${formatCountry(identifiedCountries[0].country)}` : 'Sin ubicación identificada aún'}
             icon={Globe2}
+            href="#origen-geografico"
           />
           <MetricCard
             label="Dispositivos"
             value={topDevices.length}
             detail={topDevices[0] ? `Principal: ${formatDevice(topDevices[0].device_type)}` : 'Sin datos disponibles'}
             icon={Laptop2}
+            href="#dispositivos"
           />
         </section>
 
-        <section className="rounded-lg border border-slate-800 bg-slate-900 p-5 shadow-sm">
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-sky-300">Tendencia</p>
-              <h2 className="mt-2 text-xl font-semibold text-white">Formularios por día</h2>
-            </div>
-            <p className="text-xs text-slate-500">
-              {from || to ? `Período: ${from || 'inicio'} a ${to || 'hoy'}` : 'Todo el período disponible'}
-            </p>
-          </div>
-          <div className="mt-5">
-            <DailyFormsChart data={metrics.formsByDay} />
-          </div>
-        </section>
-
-        <section className="grid min-w-0 gap-6 xl:grid-cols-[1.35fr_0.65fr]">
+        <section id="registros" className="grid min-w-0 scroll-mt-6 gap-6 xl:grid-cols-[1.35fr_0.65fr]">
           <div className="min-w-0 rounded-lg border border-slate-800 bg-slate-900 p-5 shadow-sm">
             <div className="mb-5">
               <div>
@@ -323,19 +328,19 @@ export default function AdminPage() {
                 <h2 className="mt-2 text-xl font-semibold text-white">Solicitudes recibidas</h2>
               </div>
               <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-                <label className="grid min-w-0 gap-1.5 text-xs font-medium text-slate-400">
+                <label className="grid min-w-0 gap-1.5 text-sm font-semibold text-slate-300">
                   Buscar
                   <input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Nombre" className="h-10 min-w-0 rounded-lg border border-slate-700 bg-slate-950 px-3 text-sm text-white outline-none focus:border-sky-500" />
                 </label>
-                <label className="grid min-w-0 gap-1.5 text-xs font-medium text-slate-400">
+                <label className="grid min-w-0 gap-1.5 text-sm font-semibold text-slate-300">
                   Desde
                   <input type="date" value={from} onChange={(event) => setFrom(event.target.value)} className="h-10 min-w-0 rounded-lg border border-slate-700 bg-slate-950 px-3 text-sm text-white outline-none focus:border-sky-500" />
                 </label>
-                <label className="grid min-w-0 gap-1.5 text-xs font-medium text-slate-400">
+                <label className="grid min-w-0 gap-1.5 text-sm font-semibold text-slate-300">
                   Hasta
                   <input type="date" value={to} onChange={(event) => setTo(event.target.value)} className="h-10 min-w-0 rounded-lg border border-slate-700 bg-slate-950 px-3 text-sm text-white outline-none focus:border-sky-500" />
                 </label>
-                <label className="grid min-w-0 gap-1.5 text-xs font-medium text-slate-400">
+                <label className="grid min-w-0 gap-1.5 text-sm font-semibold text-slate-300">
                   Tipo
                   <select value={type} onChange={(event) => setType(event.target.value)} className="h-10 min-w-0 rounded-lg border border-slate-700 bg-slate-950 px-3 text-sm text-white outline-none focus:border-sky-500">
                     <option value="all">Todos</option>
@@ -347,9 +352,9 @@ export default function AdminPage() {
             </div>
 
             <div className="overflow-x-auto">
-              <table className="min-w-full text-left text-sm">
+              <table className="min-w-full text-left text-[15px]">
                 <thead>
-                  <tr className="border-b border-slate-800 text-slate-400">
+                  <tr className="border-b border-slate-800 text-slate-300">
                     <th className="py-3 pr-6 font-medium">Nombre</th>
                     <th className="py-3 pr-6 font-medium">Contacto</th>
                     <th className="py-3 pr-6 font-medium">Tipo</th>
@@ -359,17 +364,17 @@ export default function AdminPage() {
                 <tbody>
                   {loading ? (
                     <tr>
-                      <td colSpan={4} className="py-8 text-center text-slate-400">Cargando…</td>
+                      <td colSpan={4} className="py-8 text-center text-slate-300">Cargando…</td>
                     </tr>
                   ) : rows.length === 0 ? (
                     <tr>
-                      <td colSpan={4} className="py-8 text-center text-slate-400">No hay registros para los filtros seleccionados.</td>
+                      <td colSpan={4} className="py-8 text-center text-slate-300">No hay registros para los filtros seleccionados.</td>
                     </tr>
                   ) : (
                     rows.map((row) => (
                       <tr key={row.id} className="cursor-pointer border-b border-slate-800 hover:bg-slate-800/60" onClick={() => setSelected(row)}>
                         <td className="py-3 pr-6 font-medium text-white">{row.name}</td>
-                        <td className="py-3 pr-6 text-slate-400">{row.email ?? row.phone ?? '—'}</td>
+                        <td className="py-3 pr-6 text-slate-300">{row.email ?? row.phone ?? '—'}</td>
                         <td className="py-3 pr-6 text-slate-300">{formatFormType(row.form_type)}</td>
                         <td className="py-3 pr-6 text-slate-300">{formatDate(row.created_at)}</td>
                       </tr>
@@ -381,22 +386,22 @@ export default function AdminPage() {
           </div>
 
           <div className="space-y-6">
-            <div className="rounded-lg border border-slate-800 bg-slate-900 p-5 shadow-sm">
-              <p className="text-xs uppercase tracking-[0.2em] text-sky-300">Origen geográfico</p>
+            <div id="origen-geografico" className="scroll-mt-6 rounded-lg border border-slate-800 bg-slate-900 p-5 shadow-sm">
+              <p className="text-sm font-semibold uppercase tracking-[0.14em] text-sky-300">Origen geográfico</p>
               <div className="mt-4">
                 <RealBarChart data={topCountries.map((item) => ({ country: formatCountry(item.country), total: item.total ?? 0 }))} labelKey="country" valueKey="total" />
               </div>
             </div>
 
-            <div className="rounded-lg border border-slate-800 bg-slate-900 p-5 shadow-sm">
-              <p className="text-xs uppercase tracking-[0.2em] text-sky-300">Dispositivos</p>
+            <div id="dispositivos" className="scroll-mt-6 rounded-lg border border-slate-800 bg-slate-900 p-5 shadow-sm">
+              <p className="text-sm font-semibold uppercase tracking-[0.14em] text-sky-300">Dispositivos</p>
               <div className="mt-4">
                 <RealBarChart data={topDevices.map((item) => ({ device_type: formatDevice(item.device_type), total: item.total ?? 0 }))} labelKey="device_type" valueKey="total" />
               </div>
             </div>
 
-            <div className="rounded-lg border border-slate-800 bg-slate-900 p-5 shadow-sm">
-              <p className="text-xs uppercase tracking-[0.2em] text-sky-300">Sistema operativo</p>
+            <div id="sistema-operativo" className="scroll-mt-6 rounded-lg border border-slate-800 bg-slate-900 p-5 shadow-sm">
+              <p className="text-sm font-semibold uppercase tracking-[0.14em] text-sky-300">Sistema operativo</p>
               <div className="mt-4">
                 <RealBarChart data={topOs.map((item) => ({ os: item.os?.toLowerCase() === 'unknown' ? 'No identificado' : item.os ?? 'No identificado', total: item.total ?? 0 }))} labelKey="os" valueKey="total" />
               </div>
@@ -404,14 +409,21 @@ export default function AdminPage() {
           </div>
         </section>
 
-        <section className="grid gap-6 md:grid-cols-2">
-          <div className="rounded-lg border border-slate-800 bg-slate-900 p-5 shadow-sm">
-            <p className="text-xs uppercase tracking-[0.2em] text-sky-300">Tipo de formulario</p>
-            <div className="mt-4">
-              <RealBarChart data={formBreakdown.map((item) => ({ form_type: item.form_type ? formatFormType(item.form_type) : 'No identificado', total: item.total ?? 0 }))} labelKey="form_type" valueKey="total" />
+        <section id="tendencia" className="scroll-mt-6 rounded-lg border border-slate-800 bg-slate-900 p-5 shadow-sm">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-sky-300">Tendencia</p>
+              <h2 className="mt-2 text-xl font-semibold text-white">Formularios por día</h2>
             </div>
+            <p className="text-sm text-slate-400">
+              {from || to ? `Período: ${from || 'inicio'} a ${to || 'hoy'}` : 'Todo el período disponible'}
+            </p>
+          </div>
+          <div className="mt-5">
+            <DailyFormsChart data={metrics.formsByDay} />
           </div>
         </section>
+
       </div>
 
       {selected ? (
@@ -421,7 +433,7 @@ export default function AdminPage() {
               <div>
                 <p className="text-xs font-semibold uppercase tracking-[0.18em] text-sky-300">{formatFormType(selected.form_type)}</p>
                 <h3 className="mt-1 text-2xl font-bold text-white">{selected.name}</h3>
-                <p className="mt-1 text-sm text-slate-400">Recibido el {formatDate(selected.created_at)}</p>
+                <p className="mt-1 text-base text-slate-300">Recibido el {formatDate(selected.created_at)}</p>
               </div>
               <button type="button" onClick={() => setSelected(null)} className="grid size-9 place-items-center rounded-lg border border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-white" aria-label="Cerrar detalle" title="Cerrar">
                 <X className="size-4" aria-hidden="true" />
@@ -430,32 +442,32 @@ export default function AdminPage() {
 
             <div className="space-y-7 p-6">
               <section>
-                <h4 className="text-sm font-semibold text-white">Información de contacto</h4>
+                <h4 className="text-base font-bold text-white">Información de contacto</h4>
                 <dl className="mt-3 grid gap-x-8 gap-y-4 border-y border-slate-800 py-4 sm:grid-cols-2">
                   <div>
-                    <dt className="text-xs font-medium uppercase text-slate-500">Correo electrónico</dt>
-                    <dd className="mt-1 break-all text-sm text-slate-100">{selected.email ?? 'No provisto'}</dd>
+                    <dt className="text-sm font-semibold uppercase text-slate-400">Correo electrónico</dt>
+                    <dd className="mt-1.5 break-all text-base leading-6 text-slate-100">{selected.email ?? 'No provisto'}</dd>
                   </div>
                   <div>
-                    <dt className="text-xs font-medium uppercase text-slate-500">Teléfono</dt>
-                    <dd className="mt-1 text-sm text-slate-100">{selected.phone ?? 'No provisto'}</dd>
+                    <dt className="text-sm font-semibold uppercase text-slate-400">Teléfono</dt>
+                    <dd className="mt-1.5 text-base leading-6 text-slate-100">{selected.phone ?? 'No provisto'}</dd>
                   </div>
                 </dl>
               </section>
 
               <section>
-                <h4 className="text-sm font-semibold text-white">Información suministrada</h4>
+                <h4 className="text-base font-bold text-white">Información suministrada</h4>
                 {selectedFields.length > 0 ? (
                   <dl className="mt-3 grid gap-x-8 gap-y-5 sm:grid-cols-2">
                     {selectedFields.map(([key, value]) => (
                       <div key={key} className="border-b border-slate-800 pb-4">
-                        <dt className="text-xs font-medium uppercase text-slate-500">{fieldLabels[key] ?? key}</dt>
-                        <dd className="mt-1.5 wrap-break-word text-sm leading-6 text-slate-100">{formatFieldValue(key, value)}</dd>
+                        <dt className="text-sm font-semibold uppercase text-slate-400">{fieldLabels[key] ?? key}</dt>
+                        <dd className="mt-2 wrap-break-word text-base leading-7 text-slate-100">{formatFieldValue(key, value)}</dd>
                       </div>
                     ))}
                   </dl>
                 ) : (
-                  <p className="mt-3 text-sm text-slate-400">No hay campos adicionales.</p>
+                  <p className="mt-3 text-base text-slate-300">No hay campos adicionales.</p>
                 )}
               </section>
             </div>
