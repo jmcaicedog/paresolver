@@ -70,24 +70,30 @@ export async function ensureDefaultAdmin() {
 
   await ensureSchema()
 
-  const email = process.env.ADMIN_EMAIL
+  const email = process.env.ADMIN_EMAIL?.toLowerCase().trim()
   const password = process.env.ADMIN_PASSWORD
 
   if (!email || !password) {
-    throw new Error('ADMIN_EMAIL y ADMIN_PASSWORD deben configurarse como variables de entorno.')
+    return null
   }
 
-  const normalizedEmail = email.toLowerCase().trim()
-
-  const existing = await sql`SELECT id FROM admin_users WHERE email = ${normalizedEmail} LIMIT 1`
+  const existing = await sql`SELECT id FROM admin_users WHERE email = ${email} LIMIT 1`
   if (existing.length > 0) {
-    return existing[0]
+    const passwordHash = await bcrypt.hash(password, 10)
+    const updated = await sql`
+      UPDATE admin_users
+      SET password_hash = ${passwordHash}, updated_at = NOW()
+      WHERE email = ${email}
+      RETURNING id, email, is_admin, created_at, updated_at
+    `
+
+    return updated[0] ?? existing[0]
   }
 
   const passwordHash = await bcrypt.hash(password, 10)
   const created = await sql`
     INSERT INTO admin_users (email, password_hash, is_admin)
-    VALUES (${normalizedEmail}, ${passwordHash}, true)
+    VALUES (${email}, ${passwordHash}, true)
     RETURNING id, email, is_admin, created_at, updated_at
   `
 
