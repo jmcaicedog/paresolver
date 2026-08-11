@@ -30,6 +30,8 @@ export function AnalyticsTracker() {
   useEffect(() => {
     const track = async () => {
       try {
+        if (window.location.pathname.startsWith('/admin')) return
+
         const userAgent = navigator.userAgent
         await fetch('/api/analytics/track', {
           method: 'POST',
@@ -40,7 +42,6 @@ export function AnalyticsTracker() {
             path: window.location.pathname,
             referrer: document.referrer || 'direct',
             userAgent,
-            country: 'unknown',
             deviceType: inferDeviceType(userAgent),
             os: inferOS(userAgent),
             browser: inferBrowser(userAgent),

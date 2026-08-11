@@ -17,7 +17,6 @@ type PrecalificacionPayload = {
   posicionEmpleo: string
   tiempoEmpleo: string
   lugarEmpleo: string
-  puestoEmpleo: string
   ingresoNeto: string
   fechaNacimiento: string
   autorizacionCredito: boolean
@@ -113,10 +112,6 @@ function precalificacionEmailTemplate(payload: PrecalificacionPayload) {
             <td style="padding:10px;border:1px solid #e6ebff;">${escapeHtml(payload.lugarEmpleo)}</td>
           </tr>
           <tr>
-            <td style="padding:10px;border:1px solid #e6ebff;background:#f8faff;font-weight:700;">Puesto de empleo</td>
-            <td style="padding:10px;border:1px solid #e6ebff;">${escapeHtml(payload.puestoEmpleo)}</td>
-          </tr>
-          <tr>
             <td style="padding:10px;border:1px solid #e6ebff;background:#f8faff;font-weight:700;">Ingreso neto</td>
             <td style="padding:10px;border:1px solid #e6ebff;">${escapeHtml(payload.ingresoNeto)}</td>
           </tr>
@@ -165,7 +160,6 @@ export async function POST(request: Request) {
       posicionEmpleo: (body.posicionEmpleo ?? "").trim(),
       tiempoEmpleo: (body.tiempoEmpleo ?? "").trim(),
       lugarEmpleo: (body.lugarEmpleo ?? "").trim(),
-      puestoEmpleo: (body.puestoEmpleo ?? "").trim(),
       ingresoNeto: (body.ingresoNeto ?? "").trim(),
       fechaNacimiento: (body.fechaNacimiento ?? "").trim(),
       autorizacionCredito: Boolean(body.autorizacionCredito),
@@ -181,7 +175,6 @@ export async function POST(request: Request) {
       !payload.posicionEmpleo ||
       !payload.tiempoEmpleo ||
       !payload.lugarEmpleo ||
-      !payload.puestoEmpleo ||
       !payload.ingresoNeto ||
       !payload.fechaNacimiento ||
       !payload.seguroSocial ||

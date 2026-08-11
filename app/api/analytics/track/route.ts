@@ -7,6 +7,12 @@ function resolveCountry(request: Request) {
   return country === 'unknown' ? 'unknown' : country.toUpperCase()
 }
 
+function resolveIpAddress(request: Request) {
+  return request.headers.get('x-forwarded-for')?.split(',')[0]?.trim()
+    ?? request.headers.get('x-real-ip')
+    ?? 'unknown'
+}
+
 export async function POST(request: Request) {
   try {
     const body = (await request.json()) as {
@@ -19,11 +25,16 @@ export async function POST(request: Request) {
       browser?: string
     }
 
+    if (!body.path || body.path.startsWith('/admin')) {
+      return NextResponse.json({ ok: true })
+    }
+
     await savePageView({
-      path: body.path ?? '/',
+      path: body.path,
       referrer: body.referrer,
       userAgent: body.userAgent,
-      country: body.country ?? resolveCountry(request),
+      ipAddress: resolveIpAddress(request),
+      country: body.country && body.country !== 'unknown' ? body.country : resolveCountry(request),
       deviceType: body.deviceType,
       os: body.os,
       browser: body.browser,

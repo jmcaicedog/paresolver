@@ -50,7 +50,6 @@ export function CtaForm() {
     posicionEmpleo: "",
     tiempoEmpleo: "",
     lugarEmpleo: "",
-    puestoEmpleo: "",
     ingresoNeto: "",
     fechaNacimiento: "",
     autorizacionCredito: false,
@@ -425,21 +424,6 @@ export function CtaForm() {
                     placeholder="LUGAR DE EMPLEO"
                     value={prequalValues.lugarEmpleo}
                     onChange={(e) => setPrequalValues((v) => ({ ...v, lugarEmpleo: e.target.value }))}
-                    className={fieldClass}
-                  />
-                </div>
-
-                <div>
-                  <label htmlFor="puestoEmpleo" className="sr-only">
-                    Puesto de empleo
-                  </label>
-                  <input
-                    id="puestoEmpleo"
-                    name="puestoEmpleo"
-                    required
-                    placeholder="PUESTO DE EMPLEO"
-                    value={prequalValues.puestoEmpleo}
-                    onChange={(e) => setPrequalValues((v) => ({ ...v, puestoEmpleo: e.target.value }))}
                     className={fieldClass}
                   />
                 </div>

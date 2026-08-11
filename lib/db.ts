@@ -319,6 +319,7 @@ export async function getMetrics(options: {
       byDevice: [],
       byOs: [],
       byFormType: [],
+      formsByDay: [],
     }
   }
 
@@ -378,6 +379,20 @@ export async function getMetrics(options: {
     ORDER BY total DESC
   `
 
+  const formsByDay = await sql`
+    SELECT
+      TO_CHAR(local_date, 'YYYY-MM-DD') AS date,
+      COUNT(*)::int AS total
+    FROM (
+      SELECT DATE(created_at AT TIME ZONE 'America/Puerto_Rico') AS local_date
+      FROM form_submissions
+      WHERE (${fromDate}::timestamptz IS NULL OR created_at >= ${fromDate})
+        AND (${toDate}::timestamptz IS NULL OR created_at <= ${toDate})
+    ) AS daily_forms
+    GROUP BY local_date
+    ORDER BY local_date ASC
+  `
+
   return {
     totalVisits: Number(views[0]?.total_visits ?? 0),
     totalForms: Number(submissions[0]?.total_forms ?? 0),
@@ -385,5 +400,6 @@ export async function getMetrics(options: {
     byDevice: byDevice ?? [],
     byOs: byOs ?? [],
     byFormType: byFormType ?? [],
+    formsByDay: formsByDay ?? [],
   }
 }
