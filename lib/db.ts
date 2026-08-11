@@ -288,13 +288,15 @@ export async function getFormSubmissions(options: {
   const to = options.to ?? ''
   const type = options.type ?? 'all'
   const search = (options.search ?? '').trim()
+  const fromDate = from ? new Date(`${from}T00:00:00`) : null
+  const toDate = to ? new Date(`${to}T23:59:59.999`) : null
 
   const rows = await sql`
     SELECT *
     FROM form_submissions
     WHERE (
-      (${from} = '' OR created_at >= ${new Date(from)})
-      AND (${to} = '' OR created_at <= ${new Date(`${to}T23:59:59`)})
+      (${fromDate}::timestamptz IS NULL OR created_at >= ${fromDate})
+      AND (${toDate}::timestamptz IS NULL OR created_at <= ${toDate})
       AND (${type} = 'all' OR form_type = ${type})
       AND (${search} = '' OR LOWER(name) LIKE ${`%${search.toLowerCase()}%`})
     )
@@ -322,26 +324,28 @@ export async function getMetrics(options: {
 
   const from = options.from ?? ''
   const to = options.to ?? ''
+  const fromDate = from ? new Date(`${from}T00:00:00`) : null
+  const toDate = to ? new Date(`${to}T23:59:59.999`) : null
 
   const views = await sql`
     SELECT COUNT(*)::int AS total_visits
     FROM page_views
-    WHERE (${from} = '' OR created_at >= ${new Date(from)})
-      AND (${to} = '' OR created_at <= ${new Date(`${to}T23:59:59`)})
+    WHERE (${fromDate}::timestamptz IS NULL OR created_at >= ${fromDate})
+      AND (${toDate}::timestamptz IS NULL OR created_at <= ${toDate})
   `
 
   const submissions = await sql`
     SELECT COUNT(*)::int AS total_forms
     FROM form_submissions
-    WHERE (${from} = '' OR created_at >= ${new Date(from)})
-      AND (${to} = '' OR created_at <= ${new Date(`${to}T23:59:59`)})
+    WHERE (${fromDate}::timestamptz IS NULL OR created_at >= ${fromDate})
+      AND (${toDate}::timestamptz IS NULL OR created_at <= ${toDate})
   `
 
   const byCountry = await sql`
     SELECT country, COUNT(*)::int AS total
     FROM page_views
-    WHERE (${from} = '' OR created_at >= ${new Date(from)})
-      AND (${to} = '' OR created_at <= ${new Date(`${to}T23:59:59`)})
+    WHERE (${fromDate}::timestamptz IS NULL OR created_at >= ${fromDate})
+      AND (${toDate}::timestamptz IS NULL OR created_at <= ${toDate})
     GROUP BY country
     ORDER BY total DESC
     LIMIT 8
@@ -350,8 +354,8 @@ export async function getMetrics(options: {
   const byDevice = await sql`
     SELECT device_type, COUNT(*)::int AS total
     FROM page_views
-    WHERE (${from} = '' OR created_at >= ${new Date(from)})
-      AND (${to} = '' OR created_at <= ${new Date(`${to}T23:59:59`)})
+    WHERE (${fromDate}::timestamptz IS NULL OR created_at >= ${fromDate})
+      AND (${toDate}::timestamptz IS NULL OR created_at <= ${toDate})
     GROUP BY device_type
     ORDER BY total DESC
   `
@@ -359,8 +363,8 @@ export async function getMetrics(options: {
   const byOs = await sql`
     SELECT os, COUNT(*)::int AS total
     FROM page_views
-    WHERE (${from} = '' OR created_at >= ${new Date(from)})
-      AND (${to} = '' OR created_at <= ${new Date(`${to}T23:59:59`)})
+    WHERE (${fromDate}::timestamptz IS NULL OR created_at >= ${fromDate})
+      AND (${toDate}::timestamptz IS NULL OR created_at <= ${toDate})
     GROUP BY os
     ORDER BY total DESC
   `
@@ -368,8 +372,8 @@ export async function getMetrics(options: {
   const byFormType = await sql`
     SELECT form_type, COUNT(*)::int AS total
     FROM form_submissions
-    WHERE (${from} = '' OR created_at >= ${new Date(from)})
-      AND (${to} = '' OR created_at <= ${new Date(`${to}T23:59:59`)})
+    WHERE (${fromDate}::timestamptz IS NULL OR created_at >= ${fromDate})
+      AND (${toDate}::timestamptz IS NULL OR created_at <= ${toDate})
     GROUP BY form_type
     ORDER BY total DESC
   `

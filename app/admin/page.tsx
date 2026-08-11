@@ -39,7 +39,7 @@ function RealBarChart({
               </div>
               <div className="h-2.5 overflow-hidden rounded-full bg-slate-800">
                 <div
-                  className="h-full rounded-full bg-gradient-to-r from-sky-500 to-cyan-400"
+                  className="h-full rounded-full bg-linear-to-r from-sky-500 to-cyan-400"
                   style={{ width: `${height}%` }}
                 />
               </div>
@@ -86,10 +86,12 @@ export default function AdminPage() {
   })
   const [selected, setSelected] = useState<Submission | null>(null)
   const [loading, setLoading] = useState(true)
+  const [loadError, setLoadError] = useState('')
 
   useEffect(() => {
     const load = async () => {
       try {
+        setLoadError('')
         const [submissionsResponse, metricsResponse] = await Promise.all([
           fetch(`/api/admin/submissions?search=${encodeURIComponent(search)}&from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}&type=${encodeURIComponent(type)}`),
           fetch(`/api/admin/metrics?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`),
@@ -100,8 +102,13 @@ export default function AdminPage() {
           return
         }
 
-        const submissionsData = await submissionsResponse.json().catch(() => ({ items: [] }))
-        const metricsData = await metricsResponse.json().catch(() => ({ metrics: { totalVisits: 0, totalForms: 0, byCountry: [], byDevice: [], byOs: [], byFormType: [] } }))
+        const submissionsData = await submissionsResponse.json().catch(() => ({}))
+        const metricsData = await metricsResponse.json().catch(() => ({}))
+
+        if (!submissionsResponse.ok || !metricsResponse.ok) {
+          setLoadError(submissionsData.message ?? metricsData.message ?? 'No se pudieron cargar los datos.')
+          return
+        }
 
         setRows(submissionsData.items ?? [])
         setMetrics(metricsData.metrics ?? { totalVisits: 0, totalForms: 0, byCountry: [], byDevice: [], byOs: [], byFormType: [] })
@@ -149,6 +156,12 @@ export default function AdminPage() {
             </button>
           </div>
         </header>
+
+        {loadError ? (
+          <div className="rounded-xl border border-rose-500/50 bg-rose-500/10 px-4 py-3 text-sm text-rose-200">
+            {loadError}
+          </div>
+        ) : null}
 
         <section className="grid gap-4 md:grid-cols-4">
           <div className="rounded-2xl border border-slate-800 bg-slate-900 p-4">
