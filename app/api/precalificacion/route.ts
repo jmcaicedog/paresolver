@@ -1,10 +1,8 @@
 import { NextResponse } from "next/server"
-import { saveFormSubmission } from "@/lib/db"
+import { getSiteSetting, saveFormSubmission } from "@/lib/db"
+import { NOTIFICATION_EMAILS_SETTING_KEY, parseNotificationEmails } from "@/lib/site-settings"
 
 const resendApiKey = process.env.RESEND_API_KEY
-const notificationEmail = "prestamos@caguascoop.com"
-const additionalNotificationEmail = "ernesto@altacommunication.net"
-const notificationEmails = [notificationEmail, additionalNotificationEmail]
 const fromEmail = "contacto@paresolver.com"
 
 type PrecalificacionPayload = {
@@ -201,6 +199,7 @@ export async function POST(request: Request) {
     }
 
     const subject = `Pre-calificación | ${payload.nombre} | ${payload.telefono} | ${payload.tipoEmpleo === "regular" ? "Empleo regular" : "Negocio propio"}`
+    const notificationEmails = parseNotificationEmails(await getSiteSetting(NOTIFICATION_EMAILS_SETTING_KEY))
 
     await saveFormSubmission({
       formType: "pre_calificacion",

@@ -2,7 +2,15 @@ import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
 import { SESSION_COOKIE_NAME, verifySession } from '@/lib/auth'
 import { ensureSchema, getAdminUserById, getSiteSetting, setSiteSetting } from '@/lib/db'
-import { DEFAULT_HOME_VIDEO_URL, getYouTubeVideoId, HOME_VIDEO_SETTING_KEY } from '@/lib/site-settings'
+import {
+  areValidNotificationEmails,
+  DEFAULT_HOME_VIDEO_URL,
+  getYouTubeVideoId,
+  HOME_VIDEO_SETTING_KEY,
+  normalizeNotificationEmails,
+  NOTIFICATION_EMAILS_SETTING_KEY,
+  parseNotificationEmails,
+} from '@/lib/site-settings'
 
 async function getAuthenticatedUser() {
   const cookieStore = await cookies()
@@ -19,7 +27,8 @@ export async function GET() {
 
     await ensureSchema()
     const videoUrl = (await getSiteSetting(HOME_VIDEO_SETTING_KEY)) ?? DEFAULT_HOME_VIDEO_URL
-    return NextResponse.json({ videoUrl })
+    const notificationEmails = parseNotificationEmails(await getSiteSetting(NOTIFICATION_EMAILS_SETTING_KEY))
+    return NextResponse.json({ videoUrl, notificationEmails })
   } catch {
     return NextResponse.json({ message: 'No se pudo cargar la configuración.' }, { status: 500 })
   }
@@ -31,15 +40,33 @@ export async function PUT(request: Request) {
       return NextResponse.json({ message: 'No autorizado.' }, { status: 401 })
     }
 
-    const body = (await request.json()) as { videoUrl?: string }
-    const videoUrl = (body.videoUrl ?? '').trim()
+    const body = (await request.json()) as { videoUrl?: string; notificationEmails?: string[] }
 
-    if (!videoUrl || !getYouTubeVideoId(videoUrl)) {
-      return NextResponse.json({ message: 'Ingresa un enlace válido de YouTube.' }, { status: 400 })
+    if (body.videoUrl !== undefined) {
+      const videoUrl = body.videoUrl.trim()
+      if (!videoUrl || !getYouTubeVideoId(videoUrl)) {
+        return NextResponse.json({ message: 'Ingresa un enlace válido de YouTube.' }, { status: 400 })
+      }
+
+      const setting = await setSiteSetting(HOME_VIDEO_SETTING_KEY, videoUrl)
+      return NextResponse.json({ videoUrl: setting.value })
     }
 
-    const setting = await setSiteSetting(HOME_VIDEO_SETTING_KEY, videoUrl)
-    return NextResponse.json({ videoUrl: setting.value })
+    if (body.notificationEmails !== undefined) {
+      if (!Array.isArray(body.notificationEmails)) {
+        return NextResponse.json({ message: 'La lista de correos no es válida.' }, { status: 400 })
+      }
+
+      const notificationEmails = normalizeNotificationEmails(body.notificationEmails)
+      if (!areValidNotificationEmails(notificationEmails)) {
+        return NextResponse.json({ message: 'Ingresa entre 1 y 10 correos electrónicos válidos.' }, { status: 400 })
+      }
+
+      await setSiteSetting(NOTIFICATION_EMAILS_SETTING_KEY, JSON.stringify(notificationEmails))
+      return NextResponse.json({ notificationEmails })
+    }
+
+    return NextResponse.json({ message: 'No se recibió ninguna configuración.' }, { status: 400 })
   } catch {
     return NextResponse.json({ message: 'No se pudo guardar la configuración.' }, { status: 500 })
   }

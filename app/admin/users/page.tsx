@@ -18,10 +18,12 @@ export default function AdminUsersPage() {
   const [password, setPassword] = useState('')
   const [currentPassword, setCurrentPassword] = useState('')
   const [videoUrl, setVideoUrl] = useState('')
+  const [notificationEmails, setNotificationEmails] = useState('')
   const [message, setMessage] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(true)
   const [savingVideo, setSavingVideo] = useState(false)
+  const [savingEmails, setSavingEmails] = useState(false)
 
   async function loadUsers() {
     setLoading(true)
@@ -47,6 +49,7 @@ export default function AdminUsersPage() {
       })
       .then((data) => {
         if (data?.videoUrl) setVideoUrl(data.videoUrl)
+        if (data?.notificationEmails) setNotificationEmails(data.notificationEmails.join('\n'))
       })
   }, [])
 
@@ -75,6 +78,34 @@ export default function AdminUsersPage() {
 
     setVideoUrl(data.videoUrl)
     setMessage('Video del inicio actualizado correctamente.')
+  }
+
+  async function handleEmailsUpdate(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    setMessage('')
+    setError('')
+    setSavingEmails(true)
+
+    const emails = notificationEmails.split(/[\n,;]+/).map((value) => value.trim()).filter(Boolean)
+    const response = await fetch('/api/admin/settings', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ notificationEmails: emails }),
+    })
+    const data = await response.json().catch(() => ({}))
+    setSavingEmails(false)
+
+    if (response.status === 401) {
+      router.push('/admin/login')
+      return
+    }
+    if (!response.ok) {
+      setError(data.message ?? 'No se pudieron actualizar los destinatarios.')
+      return
+    }
+
+    setNotificationEmails(data.notificationEmails.join('\n'))
+    setMessage('Correos de notificación actualizados correctamente.')
   }
 
   async function handleCreate(event: React.FormEvent<HTMLFormElement>) {
@@ -170,6 +201,28 @@ export default function AdminUsersPage() {
             </div>
             <button type="submit" disabled={savingVideo} className="rounded-xl bg-sky-600 px-4 py-3 font-semibold text-white hover:bg-sky-500 disabled:cursor-not-allowed disabled:opacity-60">
               {savingVideo ? 'Guardando…' : 'Guardar video'}
+            </button>
+          </form>
+        </section>
+
+        <section className="rounded-2xl border border-slate-800 bg-slate-900 p-5">
+          <h2 className="text-xl font-semibold text-white">Correos de notificación</h2>
+          <p className="mt-1 text-sm text-slate-400">Todos los formularios se enviarán a estos destinatarios. Ingresa un correo por línea.</p>
+          <form onSubmit={handleEmailsUpdate} className="mt-4 space-y-3">
+            <div>
+              <label htmlFor="notificationEmails" className="mb-2 block text-sm text-slate-300">Destinatarios</label>
+              <textarea
+                id="notificationEmails"
+                value={notificationEmails}
+                onChange={(event) => setNotificationEmails(event.target.value)}
+                required
+                rows={4}
+                placeholder={'prestamos@caguascoop.com\nernesto@altacommunication.net'}
+                className="w-full resize-y rounded-xl border border-slate-700 bg-slate-950 px-3 py-2.5 text-white outline-none focus:border-sky-500"
+              />
+            </div>
+            <button type="submit" disabled={savingEmails} className="rounded-xl bg-sky-600 px-4 py-3 font-semibold text-white hover:bg-sky-500 disabled:cursor-not-allowed disabled:opacity-60">
+              {savingEmails ? 'Guardando…' : 'Guardar correos'}
             </button>
           </form>
         </section>
