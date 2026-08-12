@@ -48,17 +48,22 @@ export function AgentForm() {
     event.preventDefault()
     setError("")
 
-    const age = getAgeFromBirthDate(values.fechaNacimiento)
-    if (age === null || age < 18) {
+    const hasAnyValue = Object.values(values).some((value) =>
+      typeof value === "boolean" ? value : value.trim().length > 0,
+    )
+    if (!hasAnyValue) {
       setStatus("error")
-      setError(age === null ? "Ingresa una fecha de nacimiento válida." : "El cliente debe ser mayor de 18 años.")
+      setError("Completa al menos un campo antes de registrar al cliente.")
       return
     }
 
-    if (!values.autorizacionCredito) {
-      setStatus("error")
-      setError("El cliente debe autorizar la indagación de crédito.")
-      return
+    if (values.fechaNacimiento) {
+      const age = getAgeFromBirthDate(values.fechaNacimiento)
+      if (age === null || age < 18) {
+        setStatus("error")
+        setError(age === null ? "Ingresa una fecha de nacimiento válida." : "El cliente debe ser mayor de 18 años.")
+        return
+      }
     }
 
     setStatus("submitting")
@@ -117,14 +122,14 @@ export function AgentForm() {
         <Field label="Pueblo" id="pueblo" value={values.pueblo} onChange={(value) => updateValue("pueblo", value)} autoComplete="address-level2" />
         <div className="sm:col-span-2">
           <label htmlFor="direccionPostal" className={labelClass}>Dirección postal</label>
-          <input id="direccionPostal" required autoComplete="street-address" value={values.direccionPostal} onChange={(event) => updateValue("direccionPostal", event.target.value)} className={fieldClass} />
+          <input id="direccionPostal" autoComplete="street-address" value={values.direccionPostal} onChange={(event) => updateValue("direccionPostal", event.target.value)} className={fieldClass} />
         </div>
       </fieldset>
 
       <fieldset className="grid gap-5 rounded-lg border border-brand-blue/15 bg-white p-5 shadow-sm sm:grid-cols-2 sm:p-7">
         <legend className="px-2 text-xl font-extrabold text-brand-blue">Producto e información laboral</legend>
         <SelectField label="Producto solicitado" id="producto" value={values.producto} onChange={(value) => updateValue("producto", value)} options={[["Préstamo Personal", "Préstamo Personal"], ["Préstamo de Auto", "Préstamo de Auto"]]} />
-        <SelectField label="Tipo de empleo" id="tipoEmpleo" value={values.tipoEmpleo} onChange={(value) => { updateValue("tipoEmpleo", value); if (value !== "negocio-propio") updateValue("tienePlanillas", "") }} options={[["regular", "Regular"], ["negocio-propio", "Negocio propio"]]} />
+        <SelectField label="Tipo de empleo" id="tipoEmpleo" value={values.tipoEmpleo} onChange={(value) => { updateValue("tipoEmpleo", value); if (value !== "negocio-propio") updateValue("tienePlanillas", "") }} options={[["regular", "Regular"], ["negocio-propio", "Negocio propio"], ["pensionado", "Pensionado"], ["retirado", "Retirado"]]} />
         {values.tipoEmpleo === "negocio-propio" && (
           <SelectField label="¿Posee las últimas dos planillas radicadas?" id="tienePlanillas" value={values.tienePlanillas} onChange={(value) => updateValue("tienePlanillas", value)} options={[["si", "Sí"], ["no", "No"]]} />
         )}
@@ -139,7 +144,7 @@ export function AgentForm() {
         <Field label="Fecha de nacimiento" id="fechaNacimiento" type="date" value={values.fechaNacimiento} onChange={(value) => updateValue("fechaNacimiento", value)} />
         <Field label="Seguro social" id="seguroSocial" value={values.seguroSocial} onChange={(value) => updateValue("seguroSocial", value)} inputMode="numeric" autoComplete="off" />
         <label className="flex items-start gap-3 rounded-lg border border-brand-blue/20 bg-brand-blue/5 p-4 text-sm font-semibold text-brand-navy sm:col-span-2">
-          <input type="checkbox" required checked={values.autorizacionCredito} onChange={(event) => updateValue("autorizacionCredito", event.target.checked)} className="mt-0.5 size-5 accent-brand-blue" />
+          <input type="checkbox" checked={values.autorizacionCredito} onChange={(event) => updateValue("autorizacionCredito", event.target.checked)} className="mt-0.5 size-5 accent-brand-blue" />
           <span>El cliente autoriza la indagación de crédito para fines de evaluación de pre-calificación.</span>
         </label>
       </fieldset>
@@ -167,7 +172,7 @@ function Field({ label, id, value, onChange, type = "text", autoComplete, inputM
   return (
     <div>
       <label htmlFor={id} className="mb-1.5 block text-sm font-bold text-brand-navy">{label}</label>
-      <input id={id} name={id} type={type} required value={value} onChange={(event) => onChange(event.target.value)} autoComplete={autoComplete} inputMode={inputMode} className="w-full rounded-lg border border-brand-blue/20 bg-white px-4 py-3 text-base font-medium text-brand-navy shadow-sm outline-none transition focus:border-brand-blue focus:ring-2 focus:ring-brand-blue/15" />
+      <input id={id} name={id} type={type} value={value} onChange={(event) => onChange(event.target.value)} autoComplete={autoComplete} inputMode={inputMode} className="w-full rounded-lg border border-brand-blue/20 bg-white px-4 py-3 text-base font-medium text-brand-navy shadow-sm outline-none transition focus:border-brand-blue focus:ring-2 focus:ring-brand-blue/15" />
     </div>
   )
 }
@@ -176,7 +181,7 @@ function SelectField({ label, id, value, onChange, options }: { label: string; i
   return (
     <div>
       <label htmlFor={id} className="mb-1.5 block text-sm font-bold text-brand-navy">{label}</label>
-      <select id={id} name={id} required value={value} onChange={(event) => onChange(event.target.value)} className="w-full rounded-lg border border-brand-blue/20 bg-white px-4 py-3 text-base font-medium text-brand-navy shadow-sm outline-none transition focus:border-brand-blue focus:ring-2 focus:ring-brand-blue/15">
+      <select id={id} name={id} value={value} onChange={(event) => onChange(event.target.value)} className="w-full rounded-lg border border-brand-blue/20 bg-white px-4 py-3 text-base font-medium text-brand-navy shadow-sm outline-none transition focus:border-brand-blue focus:ring-2 focus:ring-brand-blue/15">
         <option value="" disabled>Selecciona una opción</option>
         {options.map(([optionValue, optionLabel]) => <option key={optionValue} value={optionValue}>{optionLabel}</option>)}
       </select>

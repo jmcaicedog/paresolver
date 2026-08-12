@@ -7,6 +7,8 @@ import { Reveal } from "@/components/reveal"
 const EMPLOYMENT_TYPES = [
   { value: "regular", label: "Regular" },
   { value: "negocio-propio", label: "Negocio propio" },
+  { value: "pensionado", label: "Pensionado" },
+  { value: "retirado", label: "Retirado" },
 ] as const
 
 const PRODUCTS = [
@@ -196,7 +198,6 @@ export function CtaForm() {
                     id="correo"
                     name="correo"
                     type="email"
-                    required
                     autoComplete="email"
                     placeholder="CORREO ELECTRÓNICO"
                     value={values.correo}
@@ -335,7 +336,6 @@ export function CtaForm() {
                   <select
                     id="tipoEmpleo"
                     name="tipoEmpleo"
-                    required
                     value={prequalValues.tipoEmpleo}
                     onChange={(e) =>
                       setPrequalValues((v) => ({

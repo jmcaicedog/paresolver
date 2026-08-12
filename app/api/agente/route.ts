@@ -10,7 +10,7 @@ type AgentPayload = {
   telefono: string
   pueblo: string
   producto: string
-  tipoEmpleo: "regular" | "negocio-propio"
+  tipoEmpleo: "" | "regular" | "negocio-propio" | "pensionado" | "retirado"
   tienePlanillas?: "si" | "no"
   posicionEmpleo: string
   tiempoEmpleo: string
@@ -42,6 +42,13 @@ function tableRow(label: string, value: string) {
 }
 
 function agentEmailTemplate(payload: AgentPayload) {
+  const tipoEmpleoLabel = {
+    "": "No informado",
+    regular: "Regular",
+    "negocio-propio": "Negocio propio",
+    pensionado: "Pensionado",
+    retirado: "Retirado",
+  }[payload.tipoEmpleo]
   const contactRows = [
     ["Nombre", payload.nombre],
     ["Correo electrónico", payload.correo],
@@ -51,7 +58,7 @@ function agentEmailTemplate(payload: AgentPayload) {
     ["Producto solicitado", payload.producto],
   ]
   const evaluationRows = [
-    ["Tipo de empleo", payload.tipoEmpleo === "regular" ? "Regular" : "Negocio propio"],
+    ["Tipo de empleo", tipoEmpleoLabel],
     ["Posee últimas dos planillas", payload.tipoEmpleo === "negocio-propio" ? (payload.tienePlanillas === "si" ? "Sí" : "No") : "No aplica"],
     ["Posición de empleo", payload.posicionEmpleo],
     ["Tiempo de empleo", payload.tiempoEmpleo],
@@ -89,7 +96,7 @@ export async function POST(request: Request) {
     }
 
     const body = (await request.json()) as Partial<AgentPayload>
-    if (body.tipoEmpleo !== "regular" && body.tipoEmpleo !== "negocio-propio") {
+    if (body.tipoEmpleo && !["regular", "negocio-propio", "pensionado", "retirado"].includes(body.tipoEmpleo)) {
       return NextResponse.json({ message: "Selecciona un tipo de empleo válido." }, { status: 400 })
     }
 
@@ -99,7 +106,7 @@ export async function POST(request: Request) {
       telefono: (body.telefono ?? "").trim(),
       pueblo: (body.pueblo ?? "").trim(),
       producto: (body.producto ?? "").trim(),
-      tipoEmpleo: body.tipoEmpleo,
+      tipoEmpleo: (body.tipoEmpleo ?? "") as AgentPayload["tipoEmpleo"],
       tienePlanillas: body.tienePlanillas === "si" ? "si" : body.tienePlanillas === "no" ? "no" : undefined,
       posicionEmpleo: (body.posicionEmpleo ?? "").trim(),
       tiempoEmpleo: (body.tiempoEmpleo ?? "").trim(),
@@ -111,20 +118,18 @@ export async function POST(request: Request) {
       direccionPostal: (body.direccionPostal ?? "").trim(),
     }
 
-    const requiredValues = [payload.nombre, payload.correo, payload.telefono, payload.pueblo, payload.producto, payload.posicionEmpleo, payload.tiempoEmpleo, payload.lugarEmpleo, payload.ingresoNeto, payload.fechaNacimiento, payload.seguroSocial, payload.direccionPostal]
-    if (requiredValues.some((value) => !value)) {
-      return NextResponse.json({ message: "Faltan campos obligatorios." }, { status: 400 })
-    }
-    if (payload.tipoEmpleo === "negocio-propio" && !payload.tienePlanillas) {
-      return NextResponse.json({ message: "Indica si el cliente posee las últimas dos planillas." }, { status: 400 })
+    const hasAnyValue = Object.entries(payload).some(([key, value]) =>
+      key === "autorizacionCredito" ? value === true : typeof value === "string" && value.length > 0,
+    )
+    if (!hasAnyValue) {
+      return NextResponse.json({ message: "Completa al menos un campo antes de registrar al cliente." }, { status: 400 })
     }
 
-    const age = getAgeFromBirthDate(payload.fechaNacimiento)
-    if (age === null || age < 18) {
-      return NextResponse.json({ message: age === null ? "Fecha de nacimiento inválida." : "El cliente debe ser mayor de 18 años." }, { status: 400 })
-    }
-    if (!payload.autorizacionCredito) {
-      return NextResponse.json({ message: "La autorización de crédito es obligatoria." }, { status: 400 })
+    if (payload.fechaNacimiento) {
+      const age = getAgeFromBirthDate(payload.fechaNacimiento)
+      if (age === null || age < 18) {
+        return NextResponse.json({ message: age === null ? "Fecha de nacimiento inválida." : "El cliente debe ser mayor de 18 años." }, { status: 400 })
+      }
     }
 
     const notificationEmails = parseNotificationEmails(await getSiteSetting(AGENT_NOTIFICATION_EMAILS_SETTING_KEY))
@@ -144,7 +149,7 @@ export async function POST(request: Request) {
       body: JSON.stringify({
         from: fromEmail,
         to: notificationEmails,
-        reply_to: payload.correo,
+        ...(payload.correo ? { reply_to: payload.correo } : {}),
         subject: `Agente | ${payload.nombre} | ${payload.telefono} | ${payload.producto}`,
         html: agentEmailTemplate(payload),
       }),

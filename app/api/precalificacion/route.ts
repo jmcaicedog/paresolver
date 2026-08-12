@@ -10,7 +10,7 @@ type PrecalificacionPayload = {
   correo: string
   telefono: string
   pueblo: string
-  tipoEmpleo: "regular" | "negocio-propio"
+  tipoEmpleo: "" | "regular" | "negocio-propio" | "pensionado" | "retirado"
   tienePlanillas?: "si" | "no"
   posicionEmpleo: string
   tiempoEmpleo: string
@@ -52,7 +52,13 @@ function precalificacionEmailTemplate(payload: PrecalificacionPayload) {
     timeStyle: "short",
   })
 
-  const tipoEmpleoLabel = payload.tipoEmpleo === "regular" ? "Regular" : "Negocio propio"
+  const tipoEmpleoLabel = {
+    "": "No informado",
+    regular: "Regular",
+    "negocio-propio": "Negocio propio",
+    pensionado: "Pensionado",
+    retirado: "Retirado",
+  }[payload.tipoEmpleo]
   const autorizacionLabel = payload.autorizacionCredito ? "Sí, autorizó" : "No autorizó"
 
   return `
@@ -153,7 +159,9 @@ export async function POST(request: Request) {
       correo: (body.correo ?? "").trim(),
       telefono: (body.telefono ?? "").trim(),
       pueblo: (body.pueblo ?? "").trim(),
-      tipoEmpleo: body.tipoEmpleo === "negocio-propio" ? "negocio-propio" : "regular",
+      tipoEmpleo: ["regular", "negocio-propio", "pensionado", "retirado"].includes(body.tipoEmpleo ?? "")
+        ? body.tipoEmpleo as PrecalificacionPayload["tipoEmpleo"]
+        : "",
       tienePlanillas: body.tienePlanillas === "si" ? "si" : body.tienePlanillas === "no" ? "no" : undefined,
       posicionEmpleo: (body.posicionEmpleo ?? "").trim(),
       tiempoEmpleo: (body.tiempoEmpleo ?? "").trim(),
@@ -167,7 +175,6 @@ export async function POST(request: Request) {
 
     if (
       !payload.nombre ||
-      !payload.correo ||
       !payload.telefono ||
       !payload.pueblo ||
       !payload.posicionEmpleo ||
@@ -198,7 +205,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ message: "La autorización de crédito es obligatoria." }, { status: 400 })
     }
 
-    const subject = `Pre-calificación | ${payload.nombre} | ${payload.telefono} | ${payload.tipoEmpleo === "regular" ? "Empleo regular" : "Negocio propio"}`
+    const subject = `Pre-calificación | ${payload.nombre} | ${payload.telefono} | ${tipoEmpleoLabel}`
     const notificationEmails = parseNotificationEmails(await getSiteSetting(NOTIFICATION_EMAILS_SETTING_KEY))
 
     await saveFormSubmission({
@@ -218,7 +225,7 @@ export async function POST(request: Request) {
       body: JSON.stringify({
         from: fromEmail,
         to: notificationEmails,
-        reply_to: payload.correo,
+        ...(payload.correo ? { reply_to: payload.correo } : {}),
         subject,
         html: precalificacionEmailTemplate(payload),
       }),

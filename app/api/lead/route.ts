@@ -87,7 +87,7 @@ export async function POST(request: Request) {
       producto: (body.producto ?? "").trim(),
     }
 
-    if (!payload.nombre || !payload.telefono || !payload.pueblo || !payload.correo || !payload.producto) {
+    if (!payload.nombre || !payload.telefono || !payload.pueblo || !payload.producto) {
       return NextResponse.json({ message: "Faltan campos obligatorios." }, { status: 400 })
     }
 
@@ -114,7 +114,7 @@ export async function POST(request: Request) {
       body: JSON.stringify({
         from: fromEmail,
         to: notificationEmails,
-        reply_to: payload.correo,
+        ...(payload.correo ? { reply_to: payload.correo } : {}),
         subject,
         html: leadEmailTemplate(payload),
       }),
