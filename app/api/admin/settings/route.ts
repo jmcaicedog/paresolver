@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server'
 import { SESSION_COOKIE_NAME, verifySession } from '@/lib/auth'
 import { ensureSchema, getAdminUserById, getSiteSetting, setSiteSetting } from '@/lib/db'
 import {
+  AGENT_NOTIFICATION_EMAILS_SETTING_KEY,
   areValidNotificationEmails,
   DEFAULT_HOME_VIDEO_URL,
   getYouTubeVideoId,
@@ -28,7 +29,8 @@ export async function GET() {
     await ensureSchema()
     const videoUrl = (await getSiteSetting(HOME_VIDEO_SETTING_KEY)) ?? DEFAULT_HOME_VIDEO_URL
     const notificationEmails = parseNotificationEmails(await getSiteSetting(NOTIFICATION_EMAILS_SETTING_KEY))
-    return NextResponse.json({ videoUrl, notificationEmails })
+    const agentNotificationEmails = parseNotificationEmails(await getSiteSetting(AGENT_NOTIFICATION_EMAILS_SETTING_KEY))
+    return NextResponse.json({ videoUrl, notificationEmails, agentNotificationEmails })
   } catch {
     return NextResponse.json({ message: 'No se pudo cargar la configuración.' }, { status: 500 })
   }
@@ -40,7 +42,7 @@ export async function PUT(request: Request) {
       return NextResponse.json({ message: 'No autorizado.' }, { status: 401 })
     }
 
-    const body = (await request.json()) as { videoUrl?: string; notificationEmails?: string[] }
+    const body = (await request.json()) as { videoUrl?: string; notificationEmails?: string[]; agentNotificationEmails?: string[] }
 
     if (body.videoUrl !== undefined) {
       const videoUrl = body.videoUrl.trim()
@@ -64,6 +66,20 @@ export async function PUT(request: Request) {
 
       await setSiteSetting(NOTIFICATION_EMAILS_SETTING_KEY, JSON.stringify(notificationEmails))
       return NextResponse.json({ notificationEmails })
+    }
+
+    if (body.agentNotificationEmails !== undefined) {
+      if (!Array.isArray(body.agentNotificationEmails)) {
+        return NextResponse.json({ message: 'La lista de correos de Agente no es válida.' }, { status: 400 })
+      }
+
+      const agentNotificationEmails = normalizeNotificationEmails(body.agentNotificationEmails)
+      if (!areValidNotificationEmails(agentNotificationEmails)) {
+        return NextResponse.json({ message: 'Ingresa entre 1 y 10 correos electrónicos válidos para Agente.' }, { status: 400 })
+      }
+
+      await setSiteSetting(AGENT_NOTIFICATION_EMAILS_SETTING_KEY, JSON.stringify(agentNotificationEmails))
+      return NextResponse.json({ agentNotificationEmails })
     }
 
     return NextResponse.json({ message: 'No se recibió ninguna configuración.' }, { status: 400 })

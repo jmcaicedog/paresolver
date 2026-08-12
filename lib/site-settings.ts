@@ -1,6 +1,7 @@
 export const HOME_VIDEO_SETTING_KEY = 'home_video_url'
 export const DEFAULT_HOME_VIDEO_URL = 'https://www.youtube.com/watch?v=ScMzIvxBSi4'
 export const NOTIFICATION_EMAILS_SETTING_KEY = 'notification_emails'
+export const AGENT_NOTIFICATION_EMAILS_SETTING_KEY = 'agent_notification_emails'
 export const DEFAULT_NOTIFICATION_EMAILS = ['prestamos@caguascoop.com', 'ernesto@altacommunication.net']
 
 export function normalizeNotificationEmails(values: string[]) {

@@ -2,7 +2,7 @@ import { cookies } from "next/headers"
 import { NextResponse } from "next/server"
 import { SESSION_COOKIE_NAME, verifySession } from "@/lib/auth"
 import { getAdminUserById, getSiteSetting, saveFormSubmission } from "@/lib/db"
-import { NOTIFICATION_EMAILS_SETTING_KEY, parseNotificationEmails } from "@/lib/site-settings"
+import { AGENT_NOTIFICATION_EMAILS_SETTING_KEY, parseNotificationEmails } from "@/lib/site-settings"
 
 const fromEmail = "contacto@paresolver.com"
 
@@ -135,7 +135,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ message: "La autorización de crédito es obligatoria." }, { status: 400 })
     }
 
-    const notificationEmails = parseNotificationEmails(await getSiteSetting(NOTIFICATION_EMAILS_SETTING_KEY))
+    const notificationEmails = parseNotificationEmails(await getSiteSetting(AGENT_NOTIFICATION_EMAILS_SETTING_KEY))
 
     await saveFormSubmission({
       formType: "agente",

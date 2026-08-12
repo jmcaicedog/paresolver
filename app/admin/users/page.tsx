@@ -19,11 +19,13 @@ export default function AdminUsersPage() {
   const [currentPassword, setCurrentPassword] = useState('')
   const [videoUrl, setVideoUrl] = useState('')
   const [notificationEmails, setNotificationEmails] = useState('')
+  const [agentNotificationEmails, setAgentNotificationEmails] = useState('')
   const [message, setMessage] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(true)
   const [savingVideo, setSavingVideo] = useState(false)
   const [savingEmails, setSavingEmails] = useState(false)
+  const [savingAgentEmails, setSavingAgentEmails] = useState(false)
 
   async function loadUsers() {
     setLoading(true)
@@ -50,6 +52,7 @@ export default function AdminUsersPage() {
       .then((data) => {
         if (data?.videoUrl) setVideoUrl(data.videoUrl)
         if (data?.notificationEmails) setNotificationEmails(data.notificationEmails.join('\n'))
+        if (data?.agentNotificationEmails) setAgentNotificationEmails(data.agentNotificationEmails.join('\n'))
       })
   }, [])
 
@@ -106,6 +109,34 @@ export default function AdminUsersPage() {
 
     setNotificationEmails(data.notificationEmails.join('\n'))
     setMessage('Correos de notificación actualizados correctamente.')
+  }
+
+  async function handleAgentEmailsUpdate(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    setMessage('')
+    setError('')
+    setSavingAgentEmails(true)
+
+    const emails = agentNotificationEmails.split(/[\n,;]+/).map((value) => value.trim()).filter(Boolean)
+    const response = await fetch('/api/admin/settings', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ agentNotificationEmails: emails }),
+    })
+    const data = await response.json().catch(() => ({}))
+    setSavingAgentEmails(false)
+
+    if (response.status === 401) {
+      router.push('/admin/login')
+      return
+    }
+    if (!response.ok) {
+      setError(data.message ?? 'No se pudieron actualizar los destinatarios de Agente.')
+      return
+    }
+
+    setAgentNotificationEmails(data.agentNotificationEmails.join('\n'))
+    setMessage('Correos de notificación de Agente actualizados correctamente.')
   }
 
   async function handleCreate(event: React.FormEvent<HTMLFormElement>) {
@@ -207,7 +238,7 @@ export default function AdminUsersPage() {
 
         <section className="rounded-lg border border-slate-800 bg-slate-900 p-5 shadow-sm">
           <h2 className="text-xl font-semibold text-white">Correos de notificación</h2>
-          <p className="mt-2 text-base leading-6 text-slate-300">Todos los formularios se enviarán a estos destinatarios. Ingresa un correo por línea.</p>
+          <p className="mt-2 text-base leading-6 text-slate-300">Los formularios Lead nuevo y Precalificación se enviarán a estos destinatarios. Ingresa un correo por línea.</p>
           <form onSubmit={handleEmailsUpdate} className="mt-4 space-y-3">
             <div>
               <label htmlFor="notificationEmails" className="mb-2 block text-sm font-semibold text-slate-300">Destinatarios</label>
@@ -223,6 +254,28 @@ export default function AdminUsersPage() {
             </div>
             <button type="submit" disabled={savingEmails} className="rounded-lg bg-sky-600 px-4 py-3 text-sm font-semibold text-white hover:bg-sky-500 disabled:cursor-not-allowed disabled:opacity-60">
               {savingEmails ? 'Guardando…' : 'Guardar correos'}
+            </button>
+          </form>
+        </section>
+
+        <section className="rounded-lg border border-slate-800 bg-slate-900 p-5 shadow-sm">
+          <h2 className="text-xl font-semibold text-white">Correos de notificación de Agente</h2>
+          <p className="mt-2 text-base leading-6 text-slate-300">El formulario Agente se enviará únicamente a estos destinatarios. Ingresa un correo por línea.</p>
+          <form onSubmit={handleAgentEmailsUpdate} className="mt-4 space-y-3">
+            <div>
+              <label htmlFor="agentNotificationEmails" className="mb-2 block text-sm font-semibold text-slate-300">Destinatarios de Agente</label>
+              <textarea
+                id="agentNotificationEmails"
+                value={agentNotificationEmails}
+                onChange={(event) => setAgentNotificationEmails(event.target.value)}
+                required
+                rows={4}
+                placeholder={'prestamos@caguascoop.com\nernesto@altacommunication.net'}
+                className="w-full resize-y rounded-lg border border-slate-700 bg-slate-950 px-3 py-2.5 text-base leading-6 text-white outline-none focus:border-sky-500"
+              />
+            </div>
+            <button type="submit" disabled={savingAgentEmails} className="rounded-lg bg-sky-600 px-4 py-3 text-sm font-semibold text-white hover:bg-sky-500 disabled:cursor-not-allowed disabled:opacity-60">
+              {savingAgentEmails ? 'Guardando…' : 'Guardar correos de Agente'}
             </button>
           </form>
         </section>
