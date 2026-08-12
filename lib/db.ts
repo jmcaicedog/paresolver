@@ -4,6 +4,20 @@ import bcrypt from 'bcryptjs'
 const DATABASE_URL = process.env.DATABASE_URL
 export const sql = DATABASE_URL ? neon(DATABASE_URL) : null
 
+async function ensureAnalyticsEventsSchema() {
+  if (!sql) return
+
+  await sql`
+    CREATE TABLE IF NOT EXISTS analytics_events (
+      id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      event_name TEXT NOT NULL,
+      path TEXT NOT NULL,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    )
+  `
+  await sql`CREATE INDEX IF NOT EXISTS idx_analytics_events_name_created_at ON analytics_events (event_name, created_at DESC)`
+}
+
 export async function ensureSchema() {
   if (!sql) {
     return false
@@ -55,6 +69,15 @@ export async function ensureSchema() {
   `
 
   await sql`
+    CREATE TABLE IF NOT EXISTS analytics_events (
+      id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      event_name TEXT NOT NULL,
+      path TEXT NOT NULL,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+  `
+
+  await sql`
     CREATE TABLE IF NOT EXISTS site_settings (
       key TEXT PRIMARY KEY,
       value TEXT NOT NULL,
@@ -65,6 +88,7 @@ export async function ensureSchema() {
   await sql`CREATE INDEX IF NOT EXISTS idx_form_submissions_created_at ON form_submissions (created_at DESC);`
   await sql`CREATE INDEX IF NOT EXISTS idx_form_submissions_name ON form_submissions (name);`
   await sql`CREATE INDEX IF NOT EXISTS idx_page_views_created_at ON page_views (created_at DESC);`
+  await sql`CREATE INDEX IF NOT EXISTS idx_analytics_events_name_created_at ON analytics_events (event_name, created_at DESC);`
 
   return true
 }
@@ -312,6 +336,25 @@ export async function savePageView(input: {
   return rows[0] ?? null
 }
 
+export async function saveAnalyticsEvent(input: {
+  eventName: 'whatsapp_click'
+  path: string
+}) {
+  if (!sql) {
+    return null
+  }
+
+  await ensureAnalyticsEventsSchema()
+
+  const rows = await sql`
+    INSERT INTO analytics_events (event_name, path)
+    VALUES (${input.eventName}, ${input.path})
+    RETURNING id
+  `
+
+  return rows[0] ?? null
+}
+
 export async function getFormSubmissions(options: {
   from?: string
   to?: string
@@ -353,6 +396,7 @@ export async function getMetrics(options: {
     return {
       totalVisits: 0,
       totalForms: 0,
+      whatsappClicks: 0,
       byCountry: [],
       byDevice: [],
       byOs: [],
@@ -366,6 +410,8 @@ export async function getMetrics(options: {
   const fromDate = from ? new Date(`${from}T00:00:00`) : null
   const toDate = to ? new Date(`${to}T23:59:59.999`) : null
 
+  await ensureAnalyticsEventsSchema()
+
   const views = await sql`
     SELECT COUNT(*)::int AS total_visits
     FROM page_views
@@ -377,6 +423,14 @@ export async function getMetrics(options: {
     SELECT COUNT(*)::int AS total_forms
     FROM form_submissions
     WHERE (${fromDate}::timestamptz IS NULL OR created_at >= ${fromDate})
+      AND (${toDate}::timestamptz IS NULL OR created_at <= ${toDate})
+  `
+
+  const whatsappEvents = await sql`
+    SELECT COUNT(*)::int AS total
+    FROM analytics_events
+    WHERE event_name = 'whatsapp_click'
+      AND (${fromDate}::timestamptz IS NULL OR created_at >= ${fromDate})
       AND (${toDate}::timestamptz IS NULL OR created_at <= ${toDate})
   `
 
@@ -434,6 +488,7 @@ export async function getMetrics(options: {
   return {
     totalVisits: Number(views[0]?.total_visits ?? 0),
     totalForms: Number(submissions[0]?.total_forms ?? 0),
+    whatsappClicks: Number(whatsappEvents[0]?.total ?? 0),
     byCountry: byCountry ?? [],
     byDevice: byDevice ?? [],
     byOs: byOs ?? [],

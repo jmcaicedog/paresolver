@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import type { ReactNode } from 'react'
-import { ClipboardList, Eye, Globe2, Laptop2, LogOut, Settings, X } from 'lucide-react'
+import { ClipboardList, Eye, Globe2, Laptop2, LogOut, MessageCircle, Settings, X } from 'lucide-react'
 
 const formatDate = (value?: string) => {
   if (!value) return '—'
@@ -196,6 +196,7 @@ export default function AdminPage() {
   const [metrics, setMetrics] = useState({
     totalVisits: 0,
     totalForms: 0,
+    whatsappClicks: 0,
     byCountry: [] as MetricPoint[],
     byDevice: [] as MetricPoint[],
     byOs: [] as MetricPoint[],
@@ -229,7 +230,7 @@ export default function AdminPage() {
         }
 
         setRows(submissionsData.items ?? [])
-        setMetrics(metricsData.metrics ?? { totalVisits: 0, totalForms: 0, byCountry: [], byDevice: [], byOs: [], byFormType: [], formsByDay: [] })
+        setMetrics(metricsData.metrics ?? { totalVisits: 0, totalForms: 0, whatsappClicks: 0, byCountry: [], byDevice: [], byOs: [], byFormType: [], formsByDay: [] })
       } finally {
         setLoading(false)
       }
@@ -304,7 +305,7 @@ export default function AdminPage() {
           </div>
         ) : null}
 
-        <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <section id="resumen" className="grid scroll-mt-6 gap-4 sm:grid-cols-2 xl:grid-cols-5">
           <MetricCard label="Visitas" value={metrics.totalVisits} detail="Ver origen geográfico" icon={Eye} href="#origen-geografico" />
           <MetricCard
             label="Formularios"
@@ -318,6 +319,13 @@ export default function AdminPage() {
             )}
             icon={ClipboardList}
             href="#registros"
+          />
+          <MetricCard
+            label="Clics en WhatsApp"
+            value={metrics.whatsappClicks}
+            detail="Conversaciones iniciadas"
+            icon={MessageCircle}
+            href="#resumen"
           />
           <MetricCard
             label="Países identificados"

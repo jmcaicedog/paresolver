@@ -1,12 +1,24 @@
+"use client"
+
 const WHATSAPP_NUMBER = "17874994000"
 const WHATSAPP_MESSAGE = "Hola, me interesa solicitar un préstamo personal con CAGUAS COOP."
 
 export function WhatsappButton() {
   const href = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(WHATSAPP_MESSAGE)}`
 
+  function trackClick() {
+    void fetch("/api/analytics/event", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ eventName: "whatsapp_click", path: window.location.pathname }),
+      keepalive: true,
+    }).catch(() => undefined)
+  }
+
   return (
     <a
       href={href}
+      onClick={trackClick}
       target="_blank"
       rel="noopener noreferrer"
       aria-label="Escríbenos por WhatsApp"
