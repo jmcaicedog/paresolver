@@ -1,7 +1,5 @@
-import { cookies } from "next/headers"
 import { NextResponse } from "next/server"
-import { SESSION_COOKIE_NAME, verifySession } from "@/lib/auth"
-import { getAdminUserById, getSiteSetting, saveFormSubmission } from "@/lib/db"
+import { getSiteSetting, saveFormSubmission } from "@/lib/db"
 import { AGENT_NOTIFICATION_EMAILS_SETTING_KEY, parseNotificationEmails } from "@/lib/site-settings"
 
 const fromEmail = "contacto@paresolver.com"
@@ -86,12 +84,6 @@ function agentEmailTemplate(payload: AgentPayload) {
 
 export async function POST(request: Request) {
   try {
-    const cookieStore = await cookies()
-    const session = verifySession(cookieStore.get(SESSION_COOKIE_NAME)?.value)
-    if (!session || !(await getAdminUserById(session.userId))) {
-      return NextResponse.json({ message: "Sesión no autorizada." }, { status: 401 })
-    }
-
     if (!process.env.RESEND_API_KEY) {
       return NextResponse.json({ message: "RESEND_API_KEY no está configurada." }, { status: 500 })
     }

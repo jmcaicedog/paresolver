@@ -75,7 +75,6 @@ export function AgentForm() {
       const data = (await response.json().catch(() => null)) as { message?: string } | null
 
       if (!response.ok) {
-        if (response.status === 401) window.location.href = "/admin/login"
         setStatus("error")
         setError(data?.message ?? "No se pudo registrar al cliente.")
         return
