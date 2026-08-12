@@ -170,25 +170,25 @@ export default function AdminUsersPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 p-6 text-slate-50">
+    <div className="min-h-screen bg-slate-950 p-6 font-medium text-slate-50">
       <div className="mx-auto max-w-6xl space-y-6">
-        <header className="flex items-center justify-between rounded-2xl border border-slate-800 bg-slate-900 p-5">
+        <header className="flex items-center justify-between rounded-lg border border-slate-800 bg-slate-900 p-6 shadow-sm">
           <div>
-            <p className="text-xs uppercase tracking-[0.2em] text-sky-300">Administración</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-sky-300">Administración</p>
             <h1 className="mt-2 text-3xl font-bold text-white">Configuración</h1>
           </div>
-          <button type="button" onClick={() => router.push('/admin')} className="rounded-xl border border-slate-700 px-4 py-2 text-slate-100 hover:bg-slate-800">Volver</button>
+          <button type="button" onClick={() => router.push('/admin')} className="rounded-lg border border-slate-700 px-4 py-2.5 text-sm font-semibold text-slate-100 hover:bg-slate-800">Volver</button>
         </header>
 
         {message ? <div className="rounded-xl border border-emerald-600/40 bg-emerald-600/10 px-4 py-3 text-sm text-emerald-200">{message}</div> : null}
         {error ? <div className="rounded-xl border border-rose-600/40 bg-rose-600/10 px-4 py-3 text-sm text-rose-200">{error}</div> : null}
 
-        <section className="rounded-2xl border border-slate-800 bg-slate-900 p-5">
+        <section className="rounded-lg border border-slate-800 bg-slate-900 p-5 shadow-sm">
           <h2 className="text-xl font-semibold text-white">Video del inicio</h2>
-          <p className="mt-1 text-sm text-slate-400">El enlace guardado se mostrará en la sección de video de la página principal.</p>
+          <p className="mt-2 text-base leading-6 text-slate-300">El enlace guardado se mostrará en la sección de video de la página principal.</p>
           <form onSubmit={handleVideoUpdate} className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-end">
             <div className="flex-1">
-              <label htmlFor="videoUrl" className="mb-2 block text-sm text-slate-300">Enlace de YouTube</label>
+              <label htmlFor="videoUrl" className="mb-2 block text-sm font-semibold text-slate-300">Enlace de YouTube</label>
               <input
                 id="videoUrl"
                 value={videoUrl}
@@ -196,21 +196,21 @@ export default function AdminUsersPage() {
                 type="url"
                 required
                 placeholder="https://www.youtube.com/watch?v=..."
-                className="w-full rounded-xl border border-slate-700 bg-slate-950 px-3 py-2.5 text-white outline-none focus:border-sky-500"
+                className="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2.5 text-base text-white outline-none focus:border-sky-500"
               />
             </div>
-            <button type="submit" disabled={savingVideo} className="rounded-xl bg-sky-600 px-4 py-3 font-semibold text-white hover:bg-sky-500 disabled:cursor-not-allowed disabled:opacity-60">
+            <button type="submit" disabled={savingVideo} className="rounded-lg bg-sky-600 px-4 py-3 text-sm font-semibold text-white hover:bg-sky-500 disabled:cursor-not-allowed disabled:opacity-60">
               {savingVideo ? 'Guardando…' : 'Guardar video'}
             </button>
           </form>
         </section>
 
-        <section className="rounded-2xl border border-slate-800 bg-slate-900 p-5">
+        <section className="rounded-lg border border-slate-800 bg-slate-900 p-5 shadow-sm">
           <h2 className="text-xl font-semibold text-white">Correos de notificación</h2>
-          <p className="mt-1 text-sm text-slate-400">Todos los formularios se enviarán a estos destinatarios. Ingresa un correo por línea.</p>
+          <p className="mt-2 text-base leading-6 text-slate-300">Todos los formularios se enviarán a estos destinatarios. Ingresa un correo por línea.</p>
           <form onSubmit={handleEmailsUpdate} className="mt-4 space-y-3">
             <div>
-              <label htmlFor="notificationEmails" className="mb-2 block text-sm text-slate-300">Destinatarios</label>
+              <label htmlFor="notificationEmails" className="mb-2 block text-sm font-semibold text-slate-300">Destinatarios</label>
               <textarea
                 id="notificationEmails"
                 value={notificationEmails}
@@ -218,49 +218,49 @@ export default function AdminUsersPage() {
                 required
                 rows={4}
                 placeholder={'prestamos@caguascoop.com\nernesto@altacommunication.net'}
-                className="w-full resize-y rounded-xl border border-slate-700 bg-slate-950 px-3 py-2.5 text-white outline-none focus:border-sky-500"
+                className="w-full resize-y rounded-lg border border-slate-700 bg-slate-950 px-3 py-2.5 text-base leading-6 text-white outline-none focus:border-sky-500"
               />
             </div>
-            <button type="submit" disabled={savingEmails} className="rounded-xl bg-sky-600 px-4 py-3 font-semibold text-white hover:bg-sky-500 disabled:cursor-not-allowed disabled:opacity-60">
+            <button type="submit" disabled={savingEmails} className="rounded-lg bg-sky-600 px-4 py-3 text-sm font-semibold text-white hover:bg-sky-500 disabled:cursor-not-allowed disabled:opacity-60">
               {savingEmails ? 'Guardando…' : 'Guardar correos'}
             </button>
           </form>
         </section>
 
         <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
-          <section className="rounded-2xl border border-slate-800 bg-slate-900 p-5">
+          <section className="rounded-lg border border-slate-800 bg-slate-900 p-5 shadow-sm">
             <h2 className="mb-4 text-xl font-semibold text-white">Crear nuevo administrador</h2>
             <form onSubmit={handleCreate} className="space-y-4">
               <div>
-                <label className="mb-2 block text-sm text-slate-300">Correo electrónico</label>
-                <input value={email} onChange={(event) => setEmail(event.target.value)} type="email" required className="w-full rounded-xl border border-slate-700 bg-slate-950 px-3 py-2.5 text-white outline-none focus:border-sky-500" />
+                <label className="mb-2 block text-sm font-semibold text-slate-300">Correo electrónico</label>
+                <input value={email} onChange={(event) => setEmail(event.target.value)} type="email" required className="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2.5 text-base text-white outline-none focus:border-sky-500" />
               </div>
               <div>
-                <label className="mb-2 block text-sm text-slate-300">Contraseña temporal</label>
-                <input value={password} onChange={(event) => setPassword(event.target.value)} type="password" required className="w-full rounded-xl border border-slate-700 bg-slate-950 px-3 py-2.5 text-white outline-none focus:border-sky-500" />
+                <label className="mb-2 block text-sm font-semibold text-slate-300">Contraseña temporal</label>
+                <input value={password} onChange={(event) => setPassword(event.target.value)} type="password" required className="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2.5 text-base text-white outline-none focus:border-sky-500" />
               </div>
-              <button type="submit" className="rounded-xl bg-sky-600 px-4 py-3 font-semibold text-white hover:bg-sky-500">Crear usuario</button>
+              <button type="submit" className="rounded-lg bg-sky-600 px-4 py-3 text-sm font-semibold text-white hover:bg-sky-500">Crear usuario</button>
             </form>
           </section>
 
-          <section className="rounded-2xl border border-slate-800 bg-slate-900 p-5">
+          <section className="rounded-lg border border-slate-800 bg-slate-900 p-5 shadow-sm">
             <h2 className="mb-4 text-xl font-semibold text-white">Cambiar mi contraseña</h2>
             <form onSubmit={handleChangePassword} className="space-y-4">
               <div>
-                <label className="mb-2 block text-sm text-slate-300">Nueva contraseña</label>
-                <input value={currentPassword} onChange={(event) => setCurrentPassword(event.target.value)} type="password" required className="w-full rounded-xl border border-slate-700 bg-slate-950 px-3 py-2.5 text-white outline-none focus:border-sky-500" />
+                <label className="mb-2 block text-sm font-semibold text-slate-300">Nueva contraseña</label>
+                <input value={currentPassword} onChange={(event) => setCurrentPassword(event.target.value)} type="password" required className="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2.5 text-base text-white outline-none focus:border-sky-500" />
               </div>
-              <button type="submit" className="rounded-xl bg-emerald-600 px-4 py-3 font-semibold text-white hover:bg-emerald-500">Actualizar contraseña</button>
+              <button type="submit" className="rounded-lg bg-emerald-600 px-4 py-3 text-sm font-semibold text-white hover:bg-emerald-500">Actualizar contraseña</button>
             </form>
           </section>
         </div>
 
-        <section className="rounded-2xl border border-slate-800 bg-slate-900 p-5">
+        <section className="rounded-lg border border-slate-800 bg-slate-900 p-5 shadow-sm">
           <h2 className="mb-4 text-xl font-semibold text-white">Usuarios activos</h2>
           <div className="overflow-x-auto">
-            <table className="min-w-full text-left text-sm">
+            <table className="min-w-full text-left text-[15px]">
               <thead>
-                <tr className="border-b border-slate-800 text-slate-400">
+                <tr className="border-b border-slate-800 text-slate-300">
                   <th className="py-3 pr-6 font-medium">Correo</th>
                   <th className="py-3 pr-6 font-medium">Rol</th>
                   <th className="py-3 pr-6 font-medium">Creado</th>
@@ -269,12 +269,12 @@ export default function AdminUsersPage() {
               </thead>
               <tbody>
                 {loading ? (
-                  <tr><td colSpan={4} className="py-6 text-center text-slate-400">Cargando…</td></tr>
+                  <tr><td colSpan={4} className="py-6 text-center text-slate-300">Cargando…</td></tr>
                 ) : users.length === 0 ? (
-                  <tr><td colSpan={4} className="py-6 text-center text-slate-400">No hay usuarios.</td></tr>
+                  <tr><td colSpan={4} className="py-6 text-center text-slate-300">No hay usuarios.</td></tr>
                 ) : users.map((user) => (
                   <tr key={user.id} className="border-b border-slate-800">
-                    <td className="py-3 pr-6 text-white">{user.email}</td>
+                    <td className="py-3 pr-6 font-medium text-white">{user.email}</td>
                     <td className="py-3 pr-6 text-slate-300">{user.is_admin ? 'Administrador' : 'Usuario'}</td>
                     <td className="py-3 pr-6 text-slate-300">{new Date(user.created_at).toLocaleDateString('es-PR')}</td>
                     <td className="py-3 pr-6">
