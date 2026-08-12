@@ -7,20 +7,16 @@ export const metadata: Metadata = {
   title: 'Préstamos Personales desde $68.41 mensual | Pa\' Resolver - CAGUAS COOP',
   description:
     'Solicita tu préstamo personal con CAGUAS COOP desde $68.41 mensual. Pa\' Resolver lo que necesites. Solicita ahora, rápido y fácil.',
-  generator: 'v0.app',
   icons: {
     icon: [
       {
-        url: '/icon-light-32x32.png',
-        media: '(prefers-color-scheme: light)',
-      },
-      {
-        url: '/icon-dark-32x32.png',
-        media: '(prefers-color-scheme: dark)',
-      },
-      {
         url: '/icon.svg',
         type: 'image/svg+xml',
+      },
+      {
+        url: '/icon-light-32x32.png',
+        sizes: '32x32',
+        type: 'image/png',
       },
     ],
     apple: '/apple-icon.png',
