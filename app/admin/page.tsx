@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import type { ReactNode } from 'react'
-import { ClipboardList, Eye, Globe2, Laptop2, LogOut, Users, X } from 'lucide-react'
+import { ClipboardList, Eye, Globe2, Laptop2, LogOut, Settings, X } from 'lucide-react'
 
 const formatDate = (value?: string) => {
   if (!value) return '—'
@@ -284,8 +284,8 @@ export default function AdminPage() {
               onClick={() => router.push('/admin/users')}
               className="inline-flex items-center gap-2 rounded-lg border border-slate-700 bg-slate-800 px-4 py-2.5 text-sm font-medium text-slate-100 hover:bg-slate-700"
             >
-              <Users className="size-4" aria-hidden="true" />
-              Usuarios admin
+              <Settings className="size-4" aria-hidden="true" />
+              Configuración
             </button>
             <button
               type="button"

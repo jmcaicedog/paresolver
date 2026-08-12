@@ -17,9 +17,11 @@ export default function AdminUsersPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [currentPassword, setCurrentPassword] = useState('')
+  const [videoUrl, setVideoUrl] = useState('')
   const [message, setMessage] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(true)
+  const [savingVideo, setSavingVideo] = useState(false)
 
   async function loadUsers() {
     setLoading(true)
@@ -35,7 +37,45 @@ export default function AdminUsersPage() {
 
   useEffect(() => {
     loadUsers()
+    fetch('/api/admin/settings')
+      .then(async (response) => {
+        if (response.status === 401) {
+          router.push('/admin/login')
+          return null
+        }
+        return response.json()
+      })
+      .then((data) => {
+        if (data?.videoUrl) setVideoUrl(data.videoUrl)
+      })
   }, [])
+
+  async function handleVideoUpdate(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    setMessage('')
+    setError('')
+    setSavingVideo(true)
+
+    const response = await fetch('/api/admin/settings', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ videoUrl }),
+    })
+    const data = await response.json().catch(() => ({}))
+    setSavingVideo(false)
+
+    if (response.status === 401) {
+      router.push('/admin/login')
+      return
+    }
+    if (!response.ok) {
+      setError(data.message ?? 'No se pudo actualizar el video.')
+      return
+    }
+
+    setVideoUrl(data.videoUrl)
+    setMessage('Video del inicio actualizado correctamente.')
+  }
 
   async function handleCreate(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -104,13 +144,35 @@ export default function AdminUsersPage() {
         <header className="flex items-center justify-between rounded-2xl border border-slate-800 bg-slate-900 p-5">
           <div>
             <p className="text-xs uppercase tracking-[0.2em] text-sky-300">Administración</p>
-            <h1 className="mt-2 text-3xl font-bold text-white">Usuarios administradores</h1>
+            <h1 className="mt-2 text-3xl font-bold text-white">Configuración</h1>
           </div>
           <button type="button" onClick={() => router.push('/admin')} className="rounded-xl border border-slate-700 px-4 py-2 text-slate-100 hover:bg-slate-800">Volver</button>
         </header>
 
         {message ? <div className="rounded-xl border border-emerald-600/40 bg-emerald-600/10 px-4 py-3 text-sm text-emerald-200">{message}</div> : null}
         {error ? <div className="rounded-xl border border-rose-600/40 bg-rose-600/10 px-4 py-3 text-sm text-rose-200">{error}</div> : null}
+
+        <section className="rounded-2xl border border-slate-800 bg-slate-900 p-5">
+          <h2 className="text-xl font-semibold text-white">Video del inicio</h2>
+          <p className="mt-1 text-sm text-slate-400">El enlace guardado se mostrará en la sección de video de la página principal.</p>
+          <form onSubmit={handleVideoUpdate} className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-end">
+            <div className="flex-1">
+              <label htmlFor="videoUrl" className="mb-2 block text-sm text-slate-300">Enlace de YouTube</label>
+              <input
+                id="videoUrl"
+                value={videoUrl}
+                onChange={(event) => setVideoUrl(event.target.value)}
+                type="url"
+                required
+                placeholder="https://www.youtube.com/watch?v=..."
+                className="w-full rounded-xl border border-slate-700 bg-slate-950 px-3 py-2.5 text-white outline-none focus:border-sky-500"
+              />
+            </div>
+            <button type="submit" disabled={savingVideo} className="rounded-xl bg-sky-600 px-4 py-3 font-semibold text-white hover:bg-sky-500 disabled:cursor-not-allowed disabled:opacity-60">
+              {savingVideo ? 'Guardando…' : 'Guardar video'}
+            </button>
+          </form>
+        </section>
 
         <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
           <section className="rounded-2xl border border-slate-800 bg-slate-900 p-5">

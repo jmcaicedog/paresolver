@@ -54,11 +54,49 @@ export async function ensureSchema() {
     );
   `
 
+  await sql`
+    CREATE TABLE IF NOT EXISTS site_settings (
+      key TEXT PRIMARY KEY,
+      value TEXT NOT NULL,
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+  `
+
   await sql`CREATE INDEX IF NOT EXISTS idx_form_submissions_created_at ON form_submissions (created_at DESC);`
   await sql`CREATE INDEX IF NOT EXISTS idx_form_submissions_name ON form_submissions (name);`
   await sql`CREATE INDEX IF NOT EXISTS idx_page_views_created_at ON page_views (created_at DESC);`
 
   return true
+}
+
+export async function getSiteSetting(key: string) {
+  if (!sql) {
+    return null
+  }
+
+  try {
+    const rows = await sql`SELECT value FROM site_settings WHERE key = ${key} LIMIT 1`
+    return typeof rows[0]?.value === 'string' ? rows[0].value : null
+  } catch {
+    return null
+  }
+}
+
+export async function setSiteSetting(key: string, value: string) {
+  if (!sql) {
+    throw new Error('DATABASE_URL no configurada')
+  }
+
+  await ensureSchema()
+  const rows = await sql`
+    INSERT INTO site_settings (key, value)
+    VALUES (${key}, ${value})
+    ON CONFLICT (key) DO UPDATE
+    SET value = EXCLUDED.value, updated_at = NOW()
+    RETURNING key, value, updated_at
+  `
+
+  return rows[0]
 }
 
 export async function ensureDefaultAdmin() {

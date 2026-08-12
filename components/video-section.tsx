@@ -3,12 +3,11 @@
 import Image from "next/image"
 import { useState } from "react"
 import { Reveal } from "@/components/reveal"
+import { DEFAULT_HOME_VIDEO_URL, getYouTubeVideoId } from "@/lib/site-settings"
 
-// Replace with the real campaign video id when available.
-const YOUTUBE_ID = "ScMzIvxBSi4"
-
-export function VideoSection() {
+export function VideoSection({ videoUrl = DEFAULT_HOME_VIDEO_URL }: { videoUrl?: string }) {
   const [playing, setPlaying] = useState(false)
+  const videoId = getYouTubeVideoId(videoUrl) ?? getYouTubeVideoId(DEFAULT_HOME_VIDEO_URL)
 
   return (
     <section className="bg-brand-navy py-14 sm:py-20">
@@ -18,7 +17,7 @@ export function VideoSection() {
             {playing ? (
               <iframe
                 className="absolute inset-0 h-full w-full"
-                src={`https://www.youtube-nocookie.com/embed/${YOUTUBE_ID}?autoplay=1&rel=0`}
+                src={`https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&rel=0`}
                 title="Video Pa' Resolver - CAGUAS COOP"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                 allowFullScreen
