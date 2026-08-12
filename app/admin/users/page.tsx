@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 
 type AdminUser = {
@@ -27,8 +27,7 @@ export default function AdminUsersPage() {
   const [savingEmails, setSavingEmails] = useState(false)
   const [savingAgentEmails, setSavingAgentEmails] = useState(false)
 
-  async function loadUsers() {
-    setLoading(true)
+  const loadUsers = useCallback(async () => {
     const response = await fetch('/api/admin/users')
     if (response.status === 401) {
       router.push('/admin/login')
@@ -37,10 +36,14 @@ export default function AdminUsersPage() {
     const data = await response.json().catch(() => ({ users: [] }))
     setUsers(data.users ?? [])
     setLoading(false)
-  }
+  }, [router])
 
   useEffect(() => {
-    loadUsers()
+    let cancelled = false
+    queueMicrotask(() => {
+      if (!cancelled) void loadUsers()
+    })
+
     fetch('/api/admin/settings')
       .then(async (response) => {
         if (response.status === 401) {
@@ -54,7 +57,11 @@ export default function AdminUsersPage() {
         if (data?.notificationEmails) setNotificationEmails(data.notificationEmails.join('\n'))
         if (data?.agentNotificationEmails) setAgentNotificationEmails(data.agentNotificationEmails.join('\n'))
       })
-  }, [])
+
+    return () => {
+      cancelled = true
+    }
+  }, [loadUsers, router])
 
   async function handleVideoUpdate(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
