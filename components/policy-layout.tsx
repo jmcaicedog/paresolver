@@ -4,9 +4,13 @@ import { PaResolverLogo, CaguasCoopLogo } from "@/components/brand-logos"
 export function PolicyLayout({
   title,
   children,
+  backHref = "/",
+  backLabel = "Volver al inicio",
 }: {
   title: string
   children: React.ReactNode
+  backHref?: string
+  backLabel?: string
 }) {
   return (
     <main className="min-h-screen bg-brand-mint">
@@ -18,10 +22,10 @@ export function PolicyLayout({
             <CaguasCoopLogo variant="dark" className="hidden sm:inline-flex" />
           </div>
           <Link
-            href="/"
+            href={backHref}
             className="text-lg font-bold transition-colors hover:text-brand-lime focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
           >
-            Volver al inicio
+            {backLabel}
           </Link>
         </div>
       </header>

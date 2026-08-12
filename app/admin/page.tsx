@@ -11,7 +11,12 @@ const formatDate = (value?: string) => {
   return Number.isNaN(date.getTime()) ? value : date.toLocaleString('es-PR', { dateStyle: 'short', timeStyle: 'short' })
 }
 
-const formatFormType = (value: string) => value === 'lead_nuevo' ? 'Lead Nuevo' : 'Pre-calificación'
+const formatFormType = (value: string) => {
+  if (value === 'lead_nuevo') return 'Lead Nuevo'
+  if (value === 'pre_calificacion') return 'Pre-calificación'
+  if (value === 'agente') return 'Agente'
+  return value
+}
 
 const countryNames = new Intl.DisplayNames(['es'], { type: 'region' })
 
@@ -248,6 +253,7 @@ export default function AdminPage() {
   )
   const leadTotal = Number(metrics.byFormType.find((item) => item.form_type === 'lead_nuevo')?.total ?? 0)
   const prequalificationTotal = Number(metrics.byFormType.find((item) => item.form_type === 'pre_calificacion')?.total ?? 0)
+  const agentTotal = Number(metrics.byFormType.find((item) => item.form_type === 'agente')?.total ?? 0)
 
   async function handleLogout() {
     await fetch('/api/admin/logout', { method: 'POST' })
@@ -265,6 +271,14 @@ export default function AdminPage() {
             <p className="mt-2 text-base leading-6 text-slate-300">Seguimiento en tiempo real de visitas y solicitudes.</p>
           </div>
           <div className="flex gap-3">
+            <button
+              type="button"
+              onClick={() => router.push('/agente')}
+              className="inline-flex items-center gap-2 rounded-lg border border-sky-500/40 bg-sky-500/10 px-4 py-2.5 text-sm font-semibold text-sky-200 hover:bg-sky-500/20"
+            >
+              <ClipboardList className="size-4" aria-hidden="true" />
+              Formulario agente
+            </button>
             <button
               type="button"
               onClick={() => router.push('/admin/users')}
@@ -299,6 +313,7 @@ export default function AdminPage() {
               <span className="flex flex-wrap gap-x-3 gap-y-1">
                 <span><strong className="font-semibold text-slate-300">{leadTotal}</strong> leads nuevos</span>
                 <span><strong className="font-semibold text-slate-300">{prequalificationTotal}</strong> precalificaciones</span>
+                <span><strong className="font-semibold text-slate-300">{agentTotal}</strong> agentes</span>
               </span>
             )}
             icon={ClipboardList}
@@ -346,6 +361,7 @@ export default function AdminPage() {
                     <option value="all">Todos</option>
                     <option value="lead_nuevo">Lead nuevo</option>
                     <option value="pre_calificacion">Pre-calificación</option>
+                    <option value="agente">Agente</option>
                   </select>
                 </label>
               </div>

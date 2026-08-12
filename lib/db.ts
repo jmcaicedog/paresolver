@@ -187,7 +187,7 @@ export async function setAdminPassword(id: string, password: string) {
 }
 
 export async function saveFormSubmission(input: {
-  formType: 'lead_nuevo' | 'pre_calificacion'
+  formType: 'lead_nuevo' | 'pre_calificacion' | 'agente'
   name: string
   email?: string
   phone?: string
