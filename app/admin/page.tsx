@@ -197,6 +197,7 @@ export default function AdminPage() {
     totalVisits: 0,
     totalForms: 0,
     whatsappClicks: 0,
+    whatsappEnabled: true,
     byCountry: [] as MetricPoint[],
     byDevice: [] as MetricPoint[],
     byOs: [] as MetricPoint[],
@@ -230,7 +231,7 @@ export default function AdminPage() {
         }
 
         setRows(submissionsData.items ?? [])
-        setMetrics(metricsData.metrics ?? { totalVisits: 0, totalForms: 0, whatsappClicks: 0, byCountry: [], byDevice: [], byOs: [], byFormType: [], formsByDay: [] })
+        setMetrics(metricsData.metrics ?? { totalVisits: 0, totalForms: 0, whatsappClicks: 0, whatsappEnabled: true, byCountry: [], byDevice: [], byOs: [], byFormType: [], formsByDay: [] })
       } finally {
         setLoading(false)
       }
@@ -305,7 +306,7 @@ export default function AdminPage() {
           </div>
         ) : null}
 
-        <section id="resumen" className="grid scroll-mt-6 gap-4 sm:grid-cols-2 xl:grid-cols-5">
+        <section id="resumen" className={`grid scroll-mt-6 gap-4 sm:grid-cols-2 ${metrics.whatsappEnabled ? 'xl:grid-cols-5' : 'xl:grid-cols-4'}`}>
           <MetricCard label="Visitas" value={metrics.totalVisits} detail="Ver origen geográfico" icon={Eye} href="#origen-geografico" />
           <MetricCard
             label="Formularios"
@@ -320,13 +321,15 @@ export default function AdminPage() {
             icon={ClipboardList}
             href="#registros"
           />
-          <MetricCard
-            label="Clics en WhatsApp"
-            value={metrics.whatsappClicks}
-            detail="Conversaciones iniciadas"
-            icon={MessageCircle}
-            href="#resumen"
-          />
+          {metrics.whatsappEnabled ? (
+            <MetricCard
+              label="Clics en WhatsApp"
+              value={metrics.whatsappClicks}
+              detail="Conversaciones iniciadas"
+              icon={MessageCircle}
+              href="#resumen"
+            />
+          ) : null}
           <MetricCard
             label="Países identificados"
             value={identifiedCountries.length}

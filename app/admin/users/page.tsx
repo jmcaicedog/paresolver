@@ -20,12 +20,14 @@ export default function AdminUsersPage() {
   const [videoUrl, setVideoUrl] = useState('')
   const [notificationEmails, setNotificationEmails] = useState('')
   const [agentNotificationEmails, setAgentNotificationEmails] = useState('')
+  const [whatsappEnabled, setWhatsappEnabled] = useState(true)
   const [message, setMessage] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(true)
   const [savingVideo, setSavingVideo] = useState(false)
   const [savingEmails, setSavingEmails] = useState(false)
   const [savingAgentEmails, setSavingAgentEmails] = useState(false)
+  const [savingWhatsapp, setSavingWhatsapp] = useState(false)
 
   const loadUsers = useCallback(async () => {
     const response = await fetch('/api/admin/users')
@@ -56,6 +58,7 @@ export default function AdminUsersPage() {
         if (data?.videoUrl) setVideoUrl(data.videoUrl)
         if (data?.notificationEmails) setNotificationEmails(data.notificationEmails.join('\n'))
         if (data?.agentNotificationEmails) setAgentNotificationEmails(data.agentNotificationEmails.join('\n'))
+        if (typeof data?.whatsappEnabled === 'boolean') setWhatsappEnabled(data.whatsappEnabled)
       })
 
     return () => {
@@ -88,6 +91,33 @@ export default function AdminUsersPage() {
 
     setVideoUrl(data.videoUrl)
     setMessage('Video del inicio actualizado correctamente.')
+  }
+
+  async function handleWhatsappUpdate(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    setMessage('')
+    setError('')
+    setSavingWhatsapp(true)
+
+    const response = await fetch('/api/admin/settings', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ whatsappEnabled }),
+    })
+    const data = await response.json().catch(() => ({}))
+    setSavingWhatsapp(false)
+
+    if (response.status === 401) {
+      router.push('/admin/login')
+      return
+    }
+    if (!response.ok) {
+      setError(data.message ?? 'No se pudo actualizar WhatsApp.')
+      return
+    }
+
+    setWhatsappEnabled(data.whatsappEnabled)
+    setMessage(`Botón de WhatsApp ${data.whatsappEnabled ? 'activado' : 'desactivado'} correctamente.`)
   }
 
   async function handleEmailsUpdate(event: React.FormEvent<HTMLFormElement>) {
@@ -220,6 +250,25 @@ export default function AdminUsersPage() {
 
         {message ? <div className="rounded-xl border border-emerald-600/40 bg-emerald-600/10 px-4 py-3 text-sm text-emerald-200">{message}</div> : null}
         {error ? <div className="rounded-xl border border-rose-600/40 bg-rose-600/10 px-4 py-3 text-sm text-rose-200">{error}</div> : null}
+
+        <section className="rounded-lg border border-slate-800 bg-slate-900 p-5 shadow-sm">
+          <h2 className="text-xl font-semibold text-white">WhatsApp</h2>
+          <p className="mt-2 text-base leading-6 text-slate-300">Controla la visibilidad del botón en la página principal y de su métrica en el dashboard.</p>
+          <form onSubmit={handleWhatsappUpdate} className="mt-4 flex flex-wrap items-center gap-4">
+            <label className="inline-flex cursor-pointer items-center gap-3 text-sm font-semibold text-slate-200">
+              <input
+                type="checkbox"
+                checked={whatsappEnabled}
+                onChange={(event) => setWhatsappEnabled(event.target.checked)}
+                className="size-5 accent-sky-500"
+              />
+              Mostrar botón y métrica de WhatsApp
+            </label>
+            <button type="submit" disabled={savingWhatsapp} className="rounded-lg bg-sky-600 px-4 py-3 text-sm font-semibold text-white hover:bg-sky-500 disabled:cursor-not-allowed disabled:opacity-60">
+              {savingWhatsapp ? 'Guardando…' : 'Guardar estado'}
+            </button>
+          </form>
+        </section>
 
         <section className="rounded-lg border border-slate-800 bg-slate-900 p-5 shadow-sm">
           <h2 className="text-xl font-semibold text-white">Video del inicio</h2>

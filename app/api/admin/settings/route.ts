@@ -10,7 +10,9 @@ import {
   HOME_VIDEO_SETTING_KEY,
   normalizeNotificationEmails,
   NOTIFICATION_EMAILS_SETTING_KEY,
+  parseBooleanSetting,
   parseNotificationEmails,
+  WHATSAPP_ENABLED_SETTING_KEY,
 } from '@/lib/site-settings'
 
 async function getAuthenticatedUser() {
@@ -30,7 +32,8 @@ export async function GET() {
     const videoUrl = (await getSiteSetting(HOME_VIDEO_SETTING_KEY)) ?? DEFAULT_HOME_VIDEO_URL
     const notificationEmails = parseNotificationEmails(await getSiteSetting(NOTIFICATION_EMAILS_SETTING_KEY))
     const agentNotificationEmails = parseNotificationEmails(await getSiteSetting(AGENT_NOTIFICATION_EMAILS_SETTING_KEY))
-    return NextResponse.json({ videoUrl, notificationEmails, agentNotificationEmails })
+    const whatsappEnabled = parseBooleanSetting(await getSiteSetting(WHATSAPP_ENABLED_SETTING_KEY))
+    return NextResponse.json({ videoUrl, notificationEmails, agentNotificationEmails, whatsappEnabled })
   } catch {
     return NextResponse.json({ message: 'No se pudo cargar la configuración.' }, { status: 500 })
   }
@@ -42,7 +45,16 @@ export async function PUT(request: Request) {
       return NextResponse.json({ message: 'No autorizado.' }, { status: 401 })
     }
 
-    const body = (await request.json()) as { videoUrl?: string; notificationEmails?: string[]; agentNotificationEmails?: string[] }
+    const body = (await request.json()) as { videoUrl?: string; notificationEmails?: string[]; agentNotificationEmails?: string[]; whatsappEnabled?: boolean }
+
+    if (body.whatsappEnabled !== undefined) {
+      if (typeof body.whatsappEnabled !== 'boolean') {
+        return NextResponse.json({ message: 'El estado de WhatsApp no es válido.' }, { status: 400 })
+      }
+
+      await setSiteSetting(WHATSAPP_ENABLED_SETTING_KEY, String(body.whatsappEnabled))
+      return NextResponse.json({ whatsappEnabled: body.whatsappEnabled })
+    }
 
     if (body.videoUrl !== undefined) {
       const videoUrl = body.videoUrl.trim()

@@ -2,7 +2,14 @@ export const HOME_VIDEO_SETTING_KEY = 'home_video_url'
 export const DEFAULT_HOME_VIDEO_URL = 'https://www.youtube.com/watch?v=ScMzIvxBSi4'
 export const NOTIFICATION_EMAILS_SETTING_KEY = 'notification_emails'
 export const AGENT_NOTIFICATION_EMAILS_SETTING_KEY = 'agent_notification_emails'
+export const WHATSAPP_ENABLED_SETTING_KEY = 'whatsapp_enabled'
 export const DEFAULT_NOTIFICATION_EMAILS = ['prestamos@caguascoop.com', 'ernesto@altacommunication.net']
+
+export function parseBooleanSetting(value: string | null, defaultValue = true) {
+  if (value === 'true') return true
+  if (value === 'false') return false
+  return defaultValue
+}
 
 export function normalizeNotificationEmails(values: string[]) {
   return [...new Set(values.map((value) => value.trim().toLowerCase()).filter(Boolean))]

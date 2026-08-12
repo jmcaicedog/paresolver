@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
-import { getAdminUserById, getMetrics } from '@/lib/db'
+import { getAdminUserById, getMetrics, getSiteSetting } from '@/lib/db'
 import { SESSION_COOKIE_NAME, verifySession } from '@/lib/auth'
+import { parseBooleanSetting, WHATSAPP_ENABLED_SETTING_KEY } from '@/lib/site-settings'
 
 export async function GET(request: Request) {
   try {
@@ -22,8 +23,11 @@ export async function GET(request: Request) {
     const from = url.searchParams.get('from') ?? ''
     const to = url.searchParams.get('to') ?? ''
 
-    const metrics = await getMetrics({ from, to })
-    return NextResponse.json({ metrics })
+    const [metrics, whatsappSetting] = await Promise.all([
+      getMetrics({ from, to }),
+      getSiteSetting(WHATSAPP_ENABLED_SETTING_KEY),
+    ])
+    return NextResponse.json({ metrics: { ...metrics, whatsappEnabled: parseBooleanSetting(whatsappSetting) } })
   } catch {
     return NextResponse.json({ message: 'No se pudo obtener las métricas.' }, { status: 500 })
   }

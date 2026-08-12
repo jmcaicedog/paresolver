@@ -5,12 +5,17 @@ import { VideoSection } from "@/components/video-section"
 import { SiteFooter } from "@/components/site-footer"
 import { WhatsappButton } from "@/components/whatsapp-button"
 import { getSiteSetting } from "@/lib/db"
-import { DEFAULT_HOME_VIDEO_URL, HOME_VIDEO_SETTING_KEY } from "@/lib/site-settings"
+import { DEFAULT_HOME_VIDEO_URL, HOME_VIDEO_SETTING_KEY, parseBooleanSetting, WHATSAPP_ENABLED_SETTING_KEY } from "@/lib/site-settings"
 
 export const dynamic = "force-dynamic"
 
 export default async function Home() {
-  const videoUrl = (await getSiteSetting(HOME_VIDEO_SETTING_KEY)) ?? DEFAULT_HOME_VIDEO_URL
+  const [videoSetting, whatsappSetting] = await Promise.all([
+    getSiteSetting(HOME_VIDEO_SETTING_KEY),
+    getSiteSetting(WHATSAPP_ENABLED_SETTING_KEY),
+  ])
+  const videoUrl = videoSetting ?? DEFAULT_HOME_VIDEO_URL
+  const whatsappEnabled = parseBooleanSetting(whatsappSetting)
 
   return (
     <main className="min-h-screen bg-brand-mint">
@@ -19,7 +24,7 @@ export default async function Home() {
       <CtaForm />
       <VideoSection videoUrl={videoUrl} />
       <SiteFooter />
-      <WhatsappButton />
+      {whatsappEnabled ? <WhatsappButton /> : null}
     </main>
   )
 }
