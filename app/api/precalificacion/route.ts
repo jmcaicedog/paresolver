@@ -46,19 +46,23 @@ function getAgeFromBirthDate(dateIso: string) {
   return age
 }
 
+function getTipoEmpleoLabel(tipoEmpleo: PrecalificacionPayload["tipoEmpleo"]) {
+  return {
+    "": "No informado",
+    regular: "Regular",
+    "negocio-propio": "Negocio propio",
+    pensionado: "Pensionado",
+    retirado: "Retirado",
+  }[tipoEmpleo]
+}
+
 function precalificacionEmailTemplate(payload: PrecalificacionPayload) {
   const submittedAt = new Date().toLocaleString("es-PR", {
     dateStyle: "full",
     timeStyle: "short",
   })
 
-  const tipoEmpleoLabel = {
-    "": "No informado",
-    regular: "Regular",
-    "negocio-propio": "Negocio propio",
-    pensionado: "Pensionado",
-    retirado: "Retirado",
-  }[payload.tipoEmpleo]
+  const tipoEmpleoLabel = getTipoEmpleoLabel(payload.tipoEmpleo)
   const autorizacionLabel = payload.autorizacionCredito ? "Sí, autorizó" : "No autorizó"
 
   return `
@@ -205,7 +209,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ message: "La autorización de crédito es obligatoria." }, { status: 400 })
     }
 
-    const subject = `Pre-calificación | ${payload.nombre} | ${payload.telefono} | ${tipoEmpleoLabel}`
+    const subject = `Pre-calificación | ${payload.nombre} | ${payload.telefono} | ${getTipoEmpleoLabel(payload.tipoEmpleo)}`
     const notificationEmails = parseNotificationEmails(await getSiteSetting(NOTIFICATION_EMAILS_SETTING_KEY))
 
     await saveFormSubmission({
